@@ -3,7 +3,7 @@
 
 #include "list.h"
 #include "../test.h"
-#include "../../src/list.h"
+#include "../../src/ccomponents.h"
 
 TestResult *testSysList() {
     TestResult *result = malloc(sizeof(TestResult));

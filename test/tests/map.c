@@ -3,7 +3,7 @@
 
 #include "map.h"
 #include "../test.h"
-#include "../../src/map.h"
+#include "../../src/ccomponents.h"
 
 TestResult *testSysMap() {
     TestResult *result = malloc(sizeof(TestResult));

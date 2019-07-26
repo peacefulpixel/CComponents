@@ -1,9 +1,6 @@
 #include <stdlib.h>
 
-#include "list.h"
-#include "string.h"
-
-#include "map.h"
+#include "ccomponents.h"
 
 typedef struct _map_value_private {
     List *values;

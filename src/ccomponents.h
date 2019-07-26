@@ -1,13 +1,85 @@
-#ifndef __STRING_H__
-#define __STRING_H__
+#ifndef __C_COMPONENTS_H__
+#define __C_COMPONENTS_H__
+
+#ifndef __cplusplus
+
+typedef struct _sys_unsafe_list {
+    /* 
+     * Private value, do not even try!)
+     */
+    void *_value;
+    /* 
+     * Private size, do not even try too!)
+     */
+    int  *_size;
+    /*
+     * The size of the list item. Required for memory allocation (preferably not to change)
+     */
+    int  elementSize;
+    /*
+     * Adds an item to the list.
+     */
+    void (*push)(struct _sys_unsafe_list *this, void *value);
+    /*
+     * Removes an item from the list with offset
+     */
+    void (*remove)(struct _sys_unsafe_list *this, int index);
+    /*
+     * Replaces list item by index
+     */
+    void (*set)(struct _sys_unsafe_list *this, int index, void *value);
+    /*
+     * Returns a list item by index
+     */
+    void *(*get)(struct _sys_unsafe_list *this, int index);
+    /*
+     * Returns the length of the array
+     */
+    int  (*length)(struct _sys_unsafe_list *this);
+} List;
+
+List *newList(int elementSize);
+void deleteList(List *this);
+
+typedef struct _sys_unsafe_map {
+    /* 
+     * Private value, do not even try!)
+     */
+    void *_value;
+    /* 
+     * Private size, do not even try too!)
+     */
+    int  *_size;
+    /*
+     * The size of the map item. Required for memory allocation (preferably not to change)
+     */
+    int  elementSize;
+    /*
+     * Removes an item from the map
+     */
+    void (*remove)(struct _sys_unsafe_map *this, char *key);
+    /*
+     * Replaces map item
+     */
+    void (*set)(struct _sys_unsafe_map *this, char *key, void *value);
+    /*
+     * Returns a map item
+     */
+    void *(*get)(struct _sys_unsafe_map *this, char *_value);
+    /*
+     * Returns the length of the map
+     */
+    int  (*length)(struct _sys_unsafe_map *this);
+} Map;
+
+Map *newMap(int elementSize);
+void deleteMap(Map *this);
 
 #define newString(X)      \
     _Generic((X),         \
     char *: newStringChar,\
     int   : newStringInt  \
     ) (X)
-
-#include "list.h"
 
 /*
  * The structure that stores the match (for the match method of String).
@@ -120,4 +192,6 @@ String *newStringChar(char *);
 String *newStringInt (int   );
 void    deleteString(String *);
 
-#endif /* __STRING_H__ */
+#endif /* __cplusplus */
+
+#endif /* __C_COMPONENTS_H__ */

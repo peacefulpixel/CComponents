@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "string.h"
+#include "ccomponents.h"
 
 typedef struct _string_value_private {
     char *stringValue;

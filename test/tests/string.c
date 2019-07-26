@@ -3,7 +3,7 @@
 
 #include "string.h"
 #include "../test.h"
-#include "../../src/string.h"
+#include "../../src/ccomponents.h"
 
 TestResult *testSysString() {
     TestResult *result = malloc(sizeof(TestResult));
