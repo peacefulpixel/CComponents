@@ -213,11 +213,11 @@ int _stringLength(struct _sys_string *this) {
     return strlen(this->getValue(this));
 }
 
-int _equals(struct _sys_string *this, struct _sys_string *subject) {
+bool _equals(struct _sys_string *this, struct _sys_string *subject) {
     return strcmp(this->getValue(this), subject->getValue(subject)) == 0;
 }
 
-int _equalsChr(struct _sys_string *this, char *subject) {
+bool _equalsChr(struct _sys_string *this, char *subject) {
     return strcmp(this->getValue(this), subject) == 0;
 }
 

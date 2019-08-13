@@ -3,6 +3,8 @@
 
 #ifndef __cplusplus
 
+#include <stdbool.h>
+
 typedef struct _sys_unsafe_list {
     /* 
      * Private value, do not even try!)
@@ -181,11 +183,11 @@ typedef struct _sys_string {
     /*
      * Returns the result of comparing two Strings.
      */
-    int (*equals)(struct _sys_string *this, struct _sys_string *);
+    bool (*equals)(struct _sys_string *this, struct _sys_string *);
     /*
      * Returns the result of comparing a String and a pointer to a character.
      */
-    int (*equalsChr)(struct _sys_string *this, char *);
+    bool (*equalsChr)(struct _sys_string *this, char *);
 } String;
 
 String *newStringChar(char *);

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +16,7 @@ TestResult *setMessage(TestResult *result, char *message) {
 }
 
 int main(int argc, char **argv) {
-    int isVisibleLog = argc > 1 ? !strcmp(*argv, "--nologs") : 1;
+    bool isVisibleLog = argc > 1 ? !strcmp(*argv, "--nologs") : 1;
 
     TestResult *(*tests[TEST_COUNT])() =
         {
@@ -31,7 +32,7 @@ int main(int argc, char **argv) {
     for (int counter = 0; counter < TEST_COUNT; counter++) {
         TestResult *result = tests[counter]();
 
-        int isSuccess = result->message == NULL;
+        bool isSuccess = result->message == NULL;
         if (!isSuccess) code = ERROR;
 
         if (isVisibleLog) {
