@@ -5,6 +5,10 @@
 
 #include <stdbool.h>
 
+struct _sys_unsafe_list;
+struct _sys_unsafe_map;
+struct _sys_string;
+
 typedef struct _sys_unsafe_list {
     /* 
      * Private value, do not even try!)
@@ -162,7 +166,7 @@ typedef struct _sys_string {
     /*
      * Returns an sys/list of String *
      */
-    List *(*split)(struct _sys_string *this, char *);
+    struct _sys_unsafe_list *(*split)(struct _sys_string *this, char *);
     /*
      * Adds a integer to a string.
      */
