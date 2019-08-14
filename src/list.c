@@ -85,6 +85,12 @@ String *_ListToString(struct _sys_unsafe_list *this) {
     return result;
 }
 
+void _include(struct _sys_unsafe_list *this, void **array, int count) {
+    for (int index = 0; index < count; index++) {
+        this->push(this, *(array + index));
+    }
+}
+
 List *newList(int elementSize) {
     List *new             = (List *) malloc(sizeof(List));
     ListSizePrivate *listSize = (ListSizePrivate *) malloc(sizeof(ListSizePrivate));
@@ -98,6 +104,7 @@ List *newList(int elementSize) {
     new->get         = &_get;
     new->length      = &_listLength;
     new->toString    = &_ListToString;
+    new->include     = &_include;
 
     return new;
 }

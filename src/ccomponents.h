@@ -46,6 +46,10 @@ typedef struct _sys_unsafe_list {
      * toString standart realization
      */
     struct _sys_string *(*toString)(struct _sys_unsafe_list *this);
+    /*
+     * Adds elements of array to list
+     */
+    void (*include)(struct _sys_unsafe_list *this, void **, int);
 } List;
 
 List *newList(int elementSize);

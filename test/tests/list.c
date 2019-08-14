@@ -62,6 +62,21 @@ TestResult *testSysList() {
     String *listAsString = list->toString(list);
     deleteString(listAsString);
 
+    // Testing include()
+    char *testDataFill[] = 
+        {
+            "A", "B", "C"
+        };
+
+    list->include(list, (void **) testDataFill, 3);
+    if (strcmp(list->get(list, 3), testDataFill[0]) != 0 ||
+        strcmp(list->get(list, 4), testDataFill[1]) != 0 ||
+        strcmp(list->get(list, 5), testDataFill[2]) != 0 )
+        return setMessage(result, "(0) list->include was failed");
+
+    if (list->length(list) != 6)
+        return setMessage(result, "(1) list->include was failed");
+
     deleteList(list);
 
     return result;
