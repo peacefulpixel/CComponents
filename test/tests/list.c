@@ -77,6 +77,17 @@ TestResult *testSysList() {
     if (list->length(list) != 6)
         return setMessage(result, "(1) list->include was failed");
 
+    // Testing copy()
+    List *copy = list->copy(list);
+    if (copy->length(copy) != 6)
+        return setMessage(result, "(0) list->copy was failed");
+
+    for (int index = 0; index < 6; index++) {
+        if (copy->get(copy, index) != list->get(list, index))
+            return setMessage(result, "(0) list->copy was failed");
+    }
+
+    deleteList(copy);
     deleteList(list);
 
     return result;

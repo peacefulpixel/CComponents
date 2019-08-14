@@ -53,6 +53,14 @@ TestResult *testSysMap() {
     String *mapAsString = map->toString(map);
     deleteString(mapAsString);
 
+    // Testing copy()
+    Map *copy = map->copy(map);
+    if (strcmp(copy->get(copy, "1"), testData[1]) != 0 ||
+        strcmp(copy->get(copy, "2"), testData[0]) != 0 ||
+        strcmp(copy->get(copy, "3"), testData[3]) != 0 )
+        return setMessage(result, "(1) map->copy returns invalid data");
+
+    deleteMap(copy);
     deleteMap(map);
 
     return result;

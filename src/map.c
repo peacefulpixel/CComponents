@@ -96,6 +96,24 @@ String *_MapToString(struct _sys_unsafe_map *this) {
     return result;
 }
 
+Map *_copyMap(struct _sys_unsafe_map *this) {
+    Map *new = newMap(this->elementSize);
+    MapValuePrivate *nMapValue = (MapValuePrivate *) new->_value;
+    List *nKeys = nMapValue->keys;
+    List *nVals = nMapValue->values;
+
+    MapValuePrivate *mapValue = (MapValuePrivate *) this->_value;
+    List *keys = mapValue->keys;
+    List *vals = mapValue->values;
+
+    for (int index = 0; index < this->length(this); index++) {
+        nKeys->push(nKeys, keys->get(keys, index));
+        nVals->push(nVals, vals->get(vals, index));
+    }
+
+    return new;
+}
+
 Map *newMap(int elementSize) {
     Map *new = (Map *) malloc(sizeof(Map));
 
@@ -114,6 +132,7 @@ Map *newMap(int elementSize) {
     new->get         = &_get_map_value;
     new->length      = &_mapLength;
     new->toString    = &_MapToString;
+    new->copy        = &_copyMap;
 
     return new;
 }

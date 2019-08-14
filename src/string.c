@@ -234,6 +234,13 @@ String *_StringToString(struct _sys_string *this) {
     return string;
 }
 
+String *_copyString(struct _sys_string *this) {
+    StringValuePrivate *stringValue = (StringValuePrivate *) this->_value;
+
+    String *new = newStringChar(stringValue->stringValue);
+    return new;
+}
+
 String *newStringNull(void *value) {
     String *new       = (String *) malloc(sizeof(String));
     new->_value       = NULL;
@@ -253,6 +260,7 @@ String *newStringNull(void *value) {
     new->equals       = &_equals;
     new->equalsChr    = &_equalsChr;
     new->toString     = &_StringToString;
+    new->copy         = &_copyString;
 
     return new;
 }

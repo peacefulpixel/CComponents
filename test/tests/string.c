@@ -135,6 +135,13 @@ TestResult *testSysString() {
     }
 
     deleteString(toStringTest);
+
+    // Testing copy()
+    String *copy = string->copy(string);
+    if (!copy->equals(copy, string))
+        return setMessage(result, "(0) string->copy returns incorrect value");
+
+    deleteString(copy);
     deleteString(string);
 
     return result;

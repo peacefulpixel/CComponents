@@ -91,6 +91,16 @@ void _include(struct _sys_unsafe_list *this, void **array, int count) {
     }
 }
 
+List *_copyList(struct _sys_unsafe_list *this) {
+    ListSizePrivate  *listSize  = (ListSizePrivate  *) this->_size;
+    ListValuePrivate *listValue = (ListValuePrivate *) this->_value;
+
+    List *new = newList(this->elementSize);
+    new->include(new, listValue->listValue, listSize->listSize);
+
+    return new;
+}
+
 List *newList(int elementSize) {
     List *new             = (List *) malloc(sizeof(List));
     ListSizePrivate *listSize = (ListSizePrivate *) malloc(sizeof(ListSizePrivate));
@@ -105,6 +115,7 @@ List *newList(int elementSize) {
     new->length      = &_listLength;
     new->toString    = &_ListToString;
     new->include     = &_include;
+    new->copy        = &_copyList;
 
     return new;
 }

@@ -50,6 +50,10 @@ typedef struct _sys_unsafe_list {
      * Adds elements of array to list
      */
     void (*include)(struct _sys_unsafe_list *this, void **, int);
+    /*
+     * Returns a copy of List
+     */
+    struct _sys_unsafe_list *(*copy)(struct _sys_unsafe_list *this);
 } List;
 
 List *newList(int elementSize);
@@ -88,6 +92,10 @@ typedef struct _sys_unsafe_map {
      * toString standart realization
      */
     struct _sys_string *(*toString)(struct _sys_unsafe_map *this);
+    /*
+     * Returns a copy of List
+     */
+    struct _sys_unsafe_map *(*copy)(struct _sys_unsafe_map *this);
 } Map;
 
 Map *newMap(int elementSize);
@@ -215,6 +223,10 @@ typedef struct _sys_string {
      * toString standart realization
      */
     struct _sys_string *(*toString)(struct _sys_string *this);
+    /*
+     * Returns a copy of String
+     */
+    struct _sys_string *(*copy)(struct _sys_string *this);
 } String;
 
 String *newStringChar(char *);
