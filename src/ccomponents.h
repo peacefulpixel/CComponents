@@ -83,8 +83,11 @@ void deleteMap(Map *this);
 
 #define newString(X)      \
     _Generic((X),         \
-    char *: newStringChar,\
-    int   : newStringInt  \
+    char *   : newStringChar,\
+    int      : newStringLong,\
+    long int : newStringLong,\
+    unsigned long int : newStringULong,\
+    unsigned int      : newStringULong\
     ) (X)
 
 /*
@@ -168,9 +171,13 @@ typedef struct _sys_string {
      */
     struct _sys_unsafe_list *(*split)(struct _sys_string *this, char *);
     /*
-     * Adds a integer to a string.
+     * Adds a long integer to a string.
      */
-    void (*addInt)(struct _sys_string *this, int);
+    void (*addLong)(struct _sys_string *this, long int);
+    /*
+     * Adds a unsigned long integer to a string.
+     */
+    void (*addULong)(struct _sys_string *this, unsigned long int);
     /*
      * Attempts to convert a string to a number.
      * On unsuccessful attempt returns 0
@@ -195,7 +202,8 @@ typedef struct _sys_string {
 } String;
 
 String *newStringChar(char *);
-String *newStringInt (int   );
+String *newStringLong(long int);
+String *newStringULong(unsigned long int);
 void    deleteString(String *);
 
 #endif /* __cplusplus */

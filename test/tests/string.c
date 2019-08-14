@@ -22,13 +22,30 @@ TestResult *testSysString() {
 
     deleteString(int_string);
 
-    // Testing add() and addInt()
+    String *long_string = newString(-1744674407709551614);
+    if (strcmp(long_string->getValue(long_string), "-1744674407709551614"))
+        return setMessage(result, "(0) newStringLong was failed");
+
+    deleteString(long_string);
+
+    String *ulong_string = newString((unsigned long int) -1744674407709551614);
+    if (strcmp(ulong_string->getValue(ulong_string), "16702069666000000002"))
+        return setMessage(result, "(0) newStringULong was failed");
+
+    // Testing addULong()
+    ulong_string->addULong(ulong_string, -1);
+    if (strcmp(ulong_string->getValue(ulong_string), "1670206966600000000218446744073709551615"))
+        return setMessage(result, "(0) addULong was failed");
+
+    deleteString(ulong_string);
+
+    // Testing add() and addLong()
     string->add(string, "world!");
 
     if (strcmp(string->getValue(string), "Hello world!"))
         return setMessage(result, "(0) string->add was failed");
 
-    string->addInt(string, 93);
+    string->addLong(string, 93);
 
     if (strcmp(string->getValue(string), "Hello world!93"))
         return setMessage(result, "(0) string->addInt was failed");

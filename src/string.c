@@ -168,8 +168,15 @@ List *_split(String *this, char *regex) {
     return result;
 }
 
-void _addInt(struct _sys_string *this, int number) {
-    String *numberTemp = newStringInt(number);
+void _addLong(struct _sys_string *this, long int number) {
+    String *numberTemp = newStringLong(number);
+    this->add(this, numberTemp->getValue(numberTemp));
+
+    deleteString(numberTemp);
+}
+
+void _addULong(struct _sys_string *this, unsigned long int number) {
+    String *numberTemp = newStringULong(number);
     this->add(this, numberTemp->getValue(numberTemp));
 
     deleteString(numberTemp);
@@ -232,7 +239,8 @@ String *newStringNull(void *value) {
     new->replaceFirst = &_replaceFirst;
     new->match        = &_match;
     new->split        = &_split;
-    new->addInt       = &_addInt;
+    new->addLong      = &_addLong;
+    new->addULong     = &_addULong;
     new->toInt        = &_toInt;
     new->charAt       = &_charAt;
     new->length       = &_stringLength;
@@ -257,7 +265,7 @@ String *newStringChar(char *value) {
     return new;
 }
 
-String *newStringInt(int number) {
+String *__newStringLong(long int number, bool isUnsigned) {
     String *new = newStringNull(NULL);
     new->_value = malloc(sizeof(StringValuePrivate));
     StringValuePrivate *stringValue = (StringValuePrivate *) new->_value;
@@ -271,9 +279,17 @@ String *newStringInt(int number) {
 
     stringValue->stringValue = malloc(sizeof(char) * length + 1);
 
-    sprintf(stringValue->stringValue, "%d", number);
+    sprintf(stringValue->stringValue, isUnsigned ? "%lu" : "%ld", number);
 
     return new;
+}
+
+String *newStringLong(long int number) {
+    return __newStringLong(number, false);
+}
+
+String *newStringULong(unsigned long int number) {
+    return __newStringLong(number, true);
 }
 
 void deleteString(String *this) {
