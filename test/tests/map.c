@@ -49,6 +49,10 @@ TestResult *testSysMap() {
         strcmp(map->get(map, "3"), testData[3]) != 0 )
         return setMessage(result, "(1) map->get returns invalid data");
 
+    // Testing toString()
+    String *mapAsString = map->toString(map);
+    deleteString(mapAsString);
+
     deleteMap(map);
 
     return result;

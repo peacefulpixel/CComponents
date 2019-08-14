@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "ccomponents.h"
@@ -70,6 +71,31 @@ int _mapLength(struct _sys_unsafe_map *this) {
     return mapSize->mapSize;
 }
 
+String *_MapToString(struct _sys_unsafe_map *this) {
+    int mapLength = this->length(this);
+    MapValuePrivate *mapValue = (MapValuePrivate *) this->_value;
+    List *keys = mapValue->keys;
+
+    String *result = newString("Map(struct _sys_unsafe_map): [ ");
+    for (int index = 0; index < mapLength; index++) {
+        String *k = (String *) keys->get(keys, index);
+        uintptr_t v = (uintptr_t) this->get(this, k->getValue(k));
+
+        result->add(result, k->getValue(k));
+        result->add(result, ":");
+        result->addULong(result, (unsigned long int) v);
+        if (index != mapLength - 1) {
+            result->add(result, ", ");
+        }
+    }
+
+    result->add(result, " ] (");
+    result->addULong(result, mapLength);
+    result->add(result, ");");
+
+    return result;
+}
+
 Map *newMap(int elementSize) {
     Map *new = (Map *) malloc(sizeof(Map));
 
@@ -87,6 +113,7 @@ Map *newMap(int elementSize) {
     new->set         = &_set_map_value;
     new->get         = &_get_map_value;
     new->length      = &_mapLength;
+    new->toString    = &_MapToString;
 
     return new;
 }

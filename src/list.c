@@ -68,6 +68,23 @@ int _listLength(struct _sys_unsafe_list *this) {
     return ((ListSizePrivate  *) this->_size)->listSize;
 }
 
+String *_ListToString(struct _sys_unsafe_list *this) {
+    int listLength = this->length(this);
+    String *result = newString("List(struct _sys_unsafe_list): [ ");
+
+    for (int index = 0; index < listLength; index++) {
+        result->addLong(result, (unsigned long int) this->get(this, index));
+        if (index != (listLength - 1)) {
+            result->add(result, ", ");
+        }
+    }
+
+    result->add(result, " ] (");
+    result->addULong(result, this->length(this));
+    result->add(result, ");");
+    return result;
+}
+
 List *newList(int elementSize) {
     List *new             = (List *) malloc(sizeof(List));
     ListSizePrivate *listSize = (ListSizePrivate *) malloc(sizeof(ListSizePrivate));
@@ -80,6 +97,7 @@ List *newList(int elementSize) {
     new->set         = &_set;
     new->get         = &_get;
     new->length      = &_listLength;
+    new->toString    = &_ListToString;
 
     return new;
 }

@@ -42,6 +42,10 @@ typedef struct _sys_unsafe_list {
      * Returns the length of the array
      */
     int  (*length)(struct _sys_unsafe_list *this);
+    /*
+     * toString standart realization
+     */
+    struct _sys_string *(*toString)(struct _sys_unsafe_list *this);
 } List;
 
 List *newList(int elementSize);
@@ -76,6 +80,10 @@ typedef struct _sys_unsafe_map {
      * Returns the length of the map
      */
     int  (*length)(struct _sys_unsafe_map *this);
+    /*
+     * toString standart realization
+     */
+    struct _sys_string *(*toString)(struct _sys_unsafe_map *this);
 } Map;
 
 Map *newMap(int elementSize);
@@ -199,6 +207,10 @@ typedef struct _sys_string {
      * Returns the result of comparing a String and a pointer to a character.
      */
     bool (*equalsChr)(struct _sys_string *this, char *);
+    /*
+     * toString standart realization
+     */
+    struct _sys_string *(*toString)(struct _sys_string *this);
 } String;
 
 String *newStringChar(char *);

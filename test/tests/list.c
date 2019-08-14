@@ -58,6 +58,10 @@ TestResult *testSysList() {
         strcmp(list->get(list, 2), testData[3]) != 0 )
         return setMessage(result, "(2) list->get returns invalid data");
 
+    // Testing toString()
+    String *listAsString = list->toString(list);
+    deleteString(listAsString);
+
     deleteList(list);
 
     return result;

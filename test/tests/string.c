@@ -127,6 +127,14 @@ TestResult *testSysString() {
         return setMessage(result, "(0) string->toInt returns incorrect value");
 
     deleteString(new_str);
+
+    // Testing toString()
+    String *toStringTest = string->toString(string);
+    if (!toStringTest->equals(toStringTest, string)) {
+        return setMessage(result, "(0) string->toString returns incorrect value");
+    }
+
+    deleteString(toStringTest);
     deleteString(string);
 
     return result;

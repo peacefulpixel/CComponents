@@ -228,6 +228,12 @@ bool _equalsChr(struct _sys_string *this, char *subject) {
     return strcmp(this->getValue(this), subject) == 0;
 }
 
+String *_StringToString(struct _sys_string *this) {
+    String *string = newString(this->getValue(this));
+
+    return string;
+}
+
 String *newStringNull(void *value) {
     String *new       = (String *) malloc(sizeof(String));
     new->_value       = NULL;
@@ -246,6 +252,7 @@ String *newStringNull(void *value) {
     new->length       = &_stringLength;
     new->equals       = &_equals;
     new->equalsChr    = &_equalsChr;
+    new->toString     = &_StringToString;
 
     return new;
 }
