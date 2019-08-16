@@ -229,15 +229,12 @@ bool _equalsChr(struct _sys_string *this, char *subject) {
 }
 
 String *_StringToString(struct _sys_string *this) {
-    String *string = newString(this->getValue(this));
-
-    return string;
+    return this->copy(this);
 }
 
 String *_copyString(struct _sys_string *this) {
-    StringValuePrivate *stringValue = (StringValuePrivate *) this->_value;
+    String *new = newStringChar(this->getValue(this));
 
-    String *new = newStringChar(stringValue->stringValue);
     return new;
 }
 
