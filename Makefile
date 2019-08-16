@@ -1,5 +1,6 @@
 CC      = gcc
-CFLAGS  = -O3 -c -Wall -fPIC
+CFLAGS  = -O3 -ansi -std=c11 -c -Wall -fPIC
+CFLAGST = -O3 -ansi -std=c11 -Wall
 SRC_DIR = src
 BIN_DIR = bin
 TST_DIR = test
@@ -10,9 +11,7 @@ SOURCES = $(COMPSRC)
 OBJECTS = $(COMPOBJ)
 SOURCES_TST = $(TST_DIR)/tests/list.c $(TST_DIR)/tests/map.c $(TST_DIR)/tests/string.c 
 OBJECTS_TST = $(patsubst $(TST_DIR)/%.c, $(TST_DIR)/%.o, $(SOURCES_TST))
-TEST_SRC = $(TST_DIR)/test.c
-TEST_OBJ = $(TST_DIR)/test.o
-TEST_EXE = $(TST_DIR)/run_tests
+TEST_EXE = test.tcl
 LIB      = libccomponents
 
 MSG_BEG = @if [ ! $$(echo -n $(LOG) | wc -m) -ge 1 ]; then printf "\033[0;35m\033[1m[CComponents]\033[0m 
@@ -34,18 +33,16 @@ $(BIN_DIR)/%.o : $(SRC_DIR)/%.c
 
 $(TST_DIR)/%.o : $(TST_DIR)/%.c
 	$(MSG_BEG)\033[0m\033[0;34mBuilding test \033[1m$^:\033[0m\n$(MSG_END)
-	$(LOG)$(CC) $(CFLAGS) $< -o $@
+	$(LOG)$(CC) $(CFLAGST) $< -o $@ $(COMPOBJ)
 
-test: $(TEST_OBJ) $(OBJECTS_TST) $(OBJECTS_SYS) $(COMPOBJ)
-	$(MSG_BEG)\033[0m\033[0;34mBuilding \033[1mtest application:\033[0m\n$(MSG_END)
-	$(LOG)$(CC) $(OBJECTS) $(OBJECTS_TST) $(TEST_OBJ) -o $(TEST_EXE)
+test: $(TEST_OBJ) $(OBJECTS_TST) $(COMPOBJ)
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
 		printf "\033[0m\033[0;34mRunning \033[1mtests:\033[0m\n"; fi
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
-		./$(TEST_EXE)          ; else \
-		./$(TEST_EXE) --nologs ; fi
+		cd test && ./$(TEST_EXE) -debug ; else \
+		cd test && ./$(TEST_EXE) -nout  ; fi
 	$(MSG_BEG)\033[0m\033[0;34mDeleting \033[1mtests object files:\033[0m\n"; fi
-	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ) $(TEST_EXE)
+	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ)
 
 $(LIB): $(OBJECTS)
 	$(MSG_BEG)\033[0m\033[0;34mCreating \033[1mbuild\033[0m\033[0;34m directory:\033[0m\n$(MSG_END)
@@ -59,7 +56,7 @@ clean:
 	@$(MSG_BEG)\033[0m\033[0;34mRecursive removing \033[1mbin\033[0m\033[0;34m directory:\033[0m\n"; fi
 	$(LOG)rm -rf bin
 	$(MSG_BEG)\033[0m\033[0;34mRemoving \033[1mtests\033[0m\033[0;34m symlink:\033[0m\n"; fi
-	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ) $(TEST_EXE)
+	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ)
 	$(MSG_BEG)\033[0m\033[0;34mRecursive removing \033[1mbuild\033[0m\033[0;34m directory:\033[0m\n"; fi
 	$(LOG)rm -rf build
 

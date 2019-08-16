@@ -1,23 +1,16 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "map.h"
-#include "../test.h"
 #include "../../src/ccomponents.h"
 
-TestResult *testSysMap() {
-    TestResult *result = malloc(sizeof(TestResult));
-    result->testName = "sys/map";
-    result->message = NULL;
+int main(int argc, char **argv) {
 
     // Testing constructor
     Map *map = newMap(sizeof(char **));
     
-    if (map->length(map) != 0)
-        return setMessage(result, "(0) map->length returns incorrect value");
-
-    if (map->elementSize != sizeof(char **))
-        return setMessage(result, "(0) map->elementSize has incorrect value");
+    assert(map->length(map) == 0);
+    assert(map->elementSize == sizeof(char **));
 
     // Testing set() & get()
     char *testData[4] =
@@ -32,22 +25,16 @@ TestResult *testSysMap() {
 
     map->set(map, "2", testData[0]);
 
-    if (map->length(map) != 4)
-        return setMessage(result, "(1) map->length returns incorrect value");
-
-    if (map->get(map, "2") != map->get(map, "0"))
-        return setMessage(result, "(0) map->get returns invalid data");
+    assert(map->length(map) == 4);
+    assert(map->get(map, "2") == map->get(map, "0"));
 
     // Testing remove() & get()
     map->remove(map, "0");
 
-    if (map->length(map) != 3)
-        return setMessage(result, "(2) map->length returns incorrect value");
-
-    if (strcmp(map->get(map, "1"), testData[1]) != 0 ||
-        strcmp(map->get(map, "2"), testData[0]) != 0 ||
-        strcmp(map->get(map, "3"), testData[3]) != 0 )
-        return setMessage(result, "(1) map->get returns invalid data");
+    assert(map->length(map) == 3);
+    assert(!(strcmp(map->get(map, "1"), testData[1])) &&
+           !(strcmp(map->get(map, "2"), testData[0])) &&
+           !(strcmp(map->get(map, "3"), testData[3])) );
 
     // Testing toString()
     String *mapAsString = map->toString(map);
@@ -55,13 +42,12 @@ TestResult *testSysMap() {
 
     // Testing copy()
     Map *copy = map->copy(map);
-    if (strcmp(copy->get(copy, "1"), testData[1]) != 0 ||
-        strcmp(copy->get(copy, "2"), testData[0]) != 0 ||
-        strcmp(copy->get(copy, "3"), testData[3]) != 0 )
-        return setMessage(result, "(1) map->copy returns invalid data");
+    assert(!(strcmp(copy->get(copy, "1"), testData[1])) &&
+           !(strcmp(copy->get(copy, "2"), testData[0])) &&
+           !(strcmp(copy->get(copy, "3"), testData[3])) );
 
     deleteMap(copy);
     deleteMap(map);
 
-    return result;
+    return 0;
 }
