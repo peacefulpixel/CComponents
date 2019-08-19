@@ -21,7 +21,7 @@ int indexOfKey(List *keys, char *key) {
 }
 
 void _removeElement(struct _sys_unsafe_map *this, char *key) {
-    MapValuePrivate *pValue = (MapValuePrivate *) this->_value;
+    MapValuePrivate *pValue   = (MapValuePrivate *) this->_value;
     MapSizePrivate  *mapSize  = (MapSizePrivate  *) this->_size;
 
     int index = indexOfKey(pValue->keys, key);
@@ -41,7 +41,7 @@ void _set_map_value(struct _sys_unsafe_map *this, char *key, void *value) {
         String *newKey = newString(key);
         pValue->keys->push(pValue->keys, newKey);
 
-        void *randomMemory = malloc(this->elementSize);
+        void *randomMemory = malloc((size_t) this->elementSize);
         pValue->values->push(pValue->values, randomMemory);
         free(randomMemory);
 
@@ -90,7 +90,7 @@ String *_MapToString(struct _sys_unsafe_map *this) {
     }
 
     result->add(result, " ] (");
-    result->addULong(result, mapLength);
+    result->addULong(result, (unsigned long int) mapLength);
     result->add(result, ");");
 
     return result;
@@ -117,7 +117,7 @@ Map *_copyMap(struct _sys_unsafe_map *this) {
 Map *newMap(int elementSize) {
     Map *new = (Map *) malloc(sizeof(Map));
 
-    MapValuePrivate *mapValue = malloc(sizeof(MapValuePrivate));
+    MapValuePrivate *mapValue = (MapValuePrivate *) malloc(sizeof(MapValuePrivate));
     mapValue->keys   = newList(sizeof(char *));
     mapValue->values = newList(elementSize);
 
@@ -125,7 +125,7 @@ Map *newMap(int elementSize) {
     mapSize->mapSize = 0;
 
     new->_value      = mapValue;
-    new->_size       = (void *) mapSize;
+    new->_size       = (int *) mapSize;
     new->elementSize = elementSize;
     new->remove      = &_removeElement;
     new->set         = &_set_map_value;

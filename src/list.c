@@ -15,16 +15,16 @@ void _push(struct _sys_unsafe_list *this, void *value) {
     ListSizePrivate  *listSize  = (ListSizePrivate  *) this->_size;
     ListValuePrivate *thisValue = (ListValuePrivate *) this->_value;
 
-    ListValuePrivate *oldValue  = malloc(sizeof(ListValuePrivate));
+    ListValuePrivate *oldValue  = (ListValuePrivate *) malloc(sizeof(ListValuePrivate));
     
     int arraySize = this->elementSize * listSize->listSize;
-    oldValue->listValue = malloc(arraySize);
-    memcpy(oldValue->listValue, thisValue->listValue, arraySize);
+    oldValue->listValue = (void **) malloc((size_t) arraySize);
+    memcpy(oldValue->listValue, thisValue->listValue, (size_t) arraySize);
     
-    thisValue->listValue = malloc(arraySize + this->elementSize);
-    memcpy(thisValue->listValue, oldValue->listValue, arraySize);
+    thisValue->listValue = (void **) malloc((size_t) (arraySize + this->elementSize));
+    memcpy(thisValue->listValue, oldValue->listValue, (size_t) arraySize);
 
-    memcpy(&thisValue->listValue[listSize->listSize], &value, this->elementSize);
+    memcpy(&thisValue->listValue[listSize->listSize], &value, (size_t) this->elementSize);
     listSize->listSize++;
 
     free(oldValue->listValue);
@@ -35,16 +35,16 @@ void _remove(struct _sys_unsafe_list *this, int index) {
     ListSizePrivate  *listSize  = (ListSizePrivate  *) this->_size;
     ListValuePrivate *thisValue = (ListValuePrivate *) this->_value;
 
-    ListValuePrivate *oldValue  = malloc(sizeof(ListValuePrivate));
+    ListValuePrivate *oldValue  = (ListValuePrivate *) malloc(sizeof(ListValuePrivate));
     oldValue->listValue = thisValue->listValue;
 
     int arraySize = this->elementSize * (listSize->listSize - 1);
-    thisValue->listValue = malloc(arraySize);
+    thisValue->listValue = (void **) malloc((size_t) arraySize);
     
-    memcpy(thisValue->listValue, oldValue->listValue, index * this->elementSize);
+    memcpy(thisValue->listValue, oldValue->listValue, (size_t) (index * this->elementSize));
     memcpy(thisValue->listValue + index,
             oldValue->listValue + (index + 1), 
-            arraySize + this->elementSize - (index + 1) * this->elementSize);
+            (size_t) (arraySize + this->elementSize - (index + 1) * this->elementSize));
 
     listSize->listSize--;
 
@@ -55,7 +55,7 @@ void _remove(struct _sys_unsafe_list *this, int index) {
 void _set(struct _sys_unsafe_list *this, int index, void *value) {
     ListValuePrivate *thisValue = (ListValuePrivate *) this->_value;
 
-    memcpy(&thisValue->listValue[index], &value, this->elementSize);
+    memcpy(&thisValue->listValue[index], &value, (size_t) this->elementSize);
 }
 
 void *_get(struct _sys_unsafe_list *this, int index) {
@@ -65,7 +65,7 @@ void *_get(struct _sys_unsafe_list *this, int index) {
 }
 
 int _listLength(struct _sys_unsafe_list *this) {
-    return ((ListSizePrivate  *) this->_size)->listSize;
+    return ((ListSizePrivate *) this->_size)->listSize;
 }
 
 String *_ListToString(struct _sys_unsafe_list *this) {
@@ -73,14 +73,14 @@ String *_ListToString(struct _sys_unsafe_list *this) {
     String *result = newString("List(struct _sys_unsafe_list): [ ");
 
     for (int index = 0; index < listLength; index++) {
-        result->addLong(result, (unsigned long int) this->get(this, index));
+        result->addULong(result, (unsigned long int) this->get(this, index));
         if (index != (listLength - 1)) {
             result->add(result, ", ");
         }
     }
 
     result->add(result, " ] (");
-    result->addULong(result, this->length(this));
+    result->addULong(result, (unsigned long int) this->length(this));
     result->add(result, ");");
     return result;
 }

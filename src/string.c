@@ -16,39 +16,39 @@ char *_get_value(String *this) {
 }
 
 void _set_value(String *this, char *value) {
-    int memSize = sizeof(char) * strlen(value);
+    int memSize = (int) (sizeof(char) * strlen(value));
 
     free(((StringValuePrivate *) this->_value)->stringValue);
 
     StringValuePrivate *stringValue = (StringValuePrivate *) this->_value;
-    stringValue->stringValue = malloc(memSize + 1);
+    stringValue->stringValue = (char *) malloc((size_t) memSize + 1);
 
-    memcpy(stringValue->stringValue, value, memSize);
+    memcpy(stringValue->stringValue, value, (size_t) memSize);
     memcpy(stringValue->stringValue + memSize, "\0", 1);
 }
 
 void _add(String *this, char *value) {
-    int aSize = sizeof(char) * strlen(this->getValue(this));
-    int bSize = sizeof(char) * strlen(value);
+    int aSize = (int) (sizeof(char) * strlen(this->getValue(this)));
+    int bSize = (int) (sizeof(char) * strlen(value));
 
-    char *aDump = malloc(aSize);
-    memcpy(aDump, this->getValue(this), aSize);
+    char *aDump = (char *) malloc((size_t) aSize);
+    memcpy(aDump, this->getValue(this), (size_t) aSize);
 
     StringValuePrivate *stringValue = (StringValuePrivate *) this->_value;
-    stringValue->stringValue = malloc(aSize + bSize + 1);
+    stringValue->stringValue = (char *) malloc((size_t) (aSize + bSize) + 1);
  
-    memcpy(stringValue->stringValue, aDump, aSize);
-    memcpy(stringValue->stringValue + aSize, value, bSize);
+    memcpy(stringValue->stringValue, aDump, (size_t) aSize);
+    memcpy(stringValue->stringValue + aSize, value, (size_t) bSize);
     memcpy(stringValue->stringValue + aSize + bSize, "\0", 1);
 
     free(aDump);
 }
 
 String *_sub(struct _sys_string *this, int begin, int end) {
-    int size = sizeof(char) * (end - begin);
+    int size = (int) sizeof(char) * (end - begin);
 
-    char *newValue = malloc(size + 1);
-    memcpy(newValue, this->getValue(this) + begin, size);
+    char *newValue = (char *) malloc((size_t) size + 1);
+    memcpy(newValue, this->getValue(this) + begin, (size_t) size);
     memcpy(newValue + size, "\0", 1);
 
     String *new = newStringChar(newValue);
@@ -97,10 +97,10 @@ void _replaceFirst(struct _sys_string *this, char *regex, char *value) {
         return;
 
     char *oldValue = this->getValue(this);
-    int size = strlen(oldValue) - strlen(regex) + strlen(value);
-    char *newValue = malloc(sizeof(char) * (size + 1));
+    int size = (int) (strlen(oldValue) - strlen(regex) + strlen(value));
+    char *newValue = (char *) malloc(sizeof(char) * ((size_t) size + 1));
 
-    memcpy(newValue, oldValue, match->begin);
+    memcpy(newValue, oldValue, (size_t) match->begin);
     memcpy(newValue + match->begin, value, strlen(value));
     memcpy(newValue + match->begin + strlen(value), oldValue + match->end, strlen(oldValue + match->end));
     memcpy(newValue + size, "\0", 1);
@@ -114,7 +114,7 @@ void _replaceFirst(struct _sys_string *this, char *regex, char *value) {
 StringMatch *_match(String *this, char *regex, int maxMatchesCount) {
     regex_t regexObject;
 
-    StringMatch *matchesResult = malloc(maxMatchesCount * sizeof(matchesResult));
+    StringMatch *matchesResult = (StringMatch *) malloc((size_t) maxMatchesCount * sizeof(matchesResult));
 
     int compileResult = regcomp(&regexObject, regex, REG_EXTENDED);
     if (compileResult != 0) {
@@ -150,7 +150,7 @@ StringMatch *_match(String *this, char *regex, int maxMatchesCount) {
 
 List *_split(String *this, char *regex) {
     StringMatch *match = this->match(this, regex, 1);
-    List *result = newList(sizeof(String *));
+    List *result = newList((int) sizeof(String *));
 
     String *copy = this->sub(this, 0, this->length(this));
     while (match->begin != -1) {
@@ -217,15 +217,15 @@ char _charAt(struct _sys_string *this, int index) {
 }
 
 int _stringLength(struct _sys_string *this) {
-    return strlen(this->getValue(this));
+    return (int) strlen(this->getValue(this));
 }
 
 bool _equals(struct _sys_string *this, struct _sys_string *subject) {
-    return strcmp(this->getValue(this), subject->getValue(subject)) == 0;
+    return (bool) strcmp(this->getValue(this), subject->getValue(subject)) == 0;
 }
 
 bool _equalsChr(struct _sys_string *this, char *subject) {
-    return strcmp(this->getValue(this), subject) == 0;
+    return (bool) strcmp(this->getValue(this), subject) == 0;
 }
 
 String *_StringToString(struct _sys_string *this) {
@@ -263,15 +263,15 @@ String *newStringNull(void *value) {
 }
 
 String *newStringChar(char *value) {
-    int memSize = sizeof(char) * strlen(value);
+    int memSize = (int) (sizeof(char) * strlen(value));
 
     String *new = newStringNull(NULL);
-    new->_value = (void *) malloc(sizeof(StringValuePrivate));
+    new->_value = malloc(sizeof(StringValuePrivate));
 
     StringValuePrivate *stringValue = (StringValuePrivate *) new->_value;
-    stringValue->stringValue = malloc(memSize + 1);
+    stringValue->stringValue = (char *) malloc((size_t) memSize + 1);
 
-    memcpy(stringValue->stringValue, value, memSize);
+    memcpy(stringValue->stringValue, value, (size_t) memSize);
     memcpy(stringValue->stringValue + memSize, "\0", 1);
 
     return new;
@@ -284,12 +284,12 @@ String *__newStringLong(long int number, bool isUnsigned) {
 
     int length = 1;
     int divisior = 10;
-    while (floor(number / divisior) > 0) {
+    while (floor((double) number / divisior) > 0) {
         length++;
         divisior *= 10;
     }
 
-    stringValue->stringValue = malloc(sizeof(char) * length + 1);
+    stringValue->stringValue = malloc(sizeof(char) * (size_t) length + 1);
 
     sprintf(stringValue->stringValue, isUnsigned ? "%lu" : "%ld", number);
 
@@ -301,7 +301,7 @@ String *newStringLong(long int number) {
 }
 
 String *newStringULong(unsigned long int number) {
-    return __newStringLong(number, true);
+    return __newStringLong((long int) number, true);
 }
 
 void deleteString(String *this) {

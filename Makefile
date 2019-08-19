@@ -1,5 +1,6 @@
 CC      = gcc
-CFLAGS  = -O3 -ansi -std=c11 -c -Wall -fPIC
+CFLAGS  = -O3 -ansi -std=c11 -c -Wall -Wconversion -fPIC
+# Test flags do not contain -Wconversion, because some tests must use implicit conversion
 CFLAGST = -O3 -ansi -std=c11 -Wall
 SRC_DIR = src
 BIN_DIR = bin
