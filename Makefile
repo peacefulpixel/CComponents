@@ -24,6 +24,8 @@ TST =
 
 all: $(BIN_DIR) $(OBJECTS) test $(LIB)
 
+notest: $(BIN_DIR) $(OBJECTS) $(LIB)
+
 $(BIN_DIR):
 	$(MSG_BEG)\033[0m\033[0;34mCreating \033[1mbin\033[0m\033[0;34m directory:\033[0m\n$(MSG_END)
 	$(LOG)mkdir $(BIN_DIR)
@@ -37,6 +39,8 @@ $(TST_DIR)/%.o : $(TST_DIR)/%.c
 	$(LOG)$(CC) $(CFLAGST) $< -o $@ $(COMPOBJ)
 
 test: $(TEST_OBJ) $(OBJECTS_TST) $(COMPOBJ)
+	$(MSG_BEG)\033[0m\033[1;31mIF YOU HAVE NOT A TCL INTERPRETER YOU CAN BUILD PROJECT WITH "notest" GOAL\033[0m\n$(MSG_END)
+	$(MSG_BEG)\033[0m\033[1;31mFor example: make notest \033[0m\n$(MSG_END)
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
 		printf "\033[0m\033[0;34mRunning \033[1mtests:\033[0m\n"; fi
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
