@@ -3,147 +3,148 @@
 
 #include "ccomponents.h"
 
-typedef struct _map_value_private {
+#define P_SIZE sizeof(intptr_t)
+
+typedef struct _map_private {
     List *values;
     List *keys;
-} MapValuePrivate;
+    unsigned long int mapSize;
+} Private;
 
-typedef struct _map_size_private {
-    int mapSize;
-} MapSizePrivate;
-
-int indexOfKey(List *keys, char *key) {
-    for (int index = 0; index < keys->length(keys); index++) {
-        String *currentKey = (String *) keys->get(keys, index);
-        if (currentKey->equalsChr(currentKey, key))
+long int __map_indexOfKey(List *keys, char *key) {
+    for (unsigned long int index = 0; index < keys->class->length(keys); index++) {
+        String *currentKey = (String *) keys->class->get(keys, index);
+        if (currentKey->class->equalsChr(currentKey, key))
             return index;
     } return -1;
 }
 
-void _removeElement(struct _sys_unsafe_map *this, char *key) {
-    MapValuePrivate *pValue   = (MapValuePrivate *) this->_value;
-    MapSizePrivate  *mapSize  = (MapSizePrivate  *) this->_size;
+void __map_remove(Map *this, char *key) {
+    Private *private = (Private *) this->_private;
 
-    int index = indexOfKey(pValue->keys, key);
+    unsigned long int index = __map_indexOfKey(private->keys, key);
 
-    deleteString(pValue->keys->get(pValue->keys, index));
-    pValue->keys->remove(pValue->keys, index);
-    pValue->values->remove(pValue->values, index);
+    delete(((String *) private->keys->class->get(private->keys, index)));
+    private->keys->class->remove(private->keys, index);
+    private->values->class->remove(private->values, index);
 
-    mapSize->mapSize--;
+    private->mapSize--;
 }
 
-void _set_map_value(struct _sys_unsafe_map *this, char *key, void *value) {
-    MapValuePrivate *pValue = (MapValuePrivate *) this->_value;
-    int index = indexOfKey(pValue->keys, key);
+void __map_set(Map *this, char *key, void *value) {
+    Private *private = (Private *) this->_private;
+    unsigned long int index = __map_indexOfKey(private->keys, key);
 
     if (index == -1) {
-        String *newKey = newString(key);
-        pValue->keys->push(pValue->keys, newKey);
+        String *newKey = CreateString(key);
+        private->keys->class->push(private->keys, newKey);
 
-        void *randomMemory = malloc((size_t) this->elementSize);
-        pValue->values->push(pValue->values, randomMemory);
+        void *randomMemory = malloc((size_t) P_SIZE);
+        private->values->class->push(private->values, randomMemory);
         free(randomMemory);
 
-        MapSizePrivate *pSize = (MapSizePrivate *) this->_size;
-        pSize->mapSize++;
+        private->mapSize++;
 
-        // More fast then call indexOfKey() again
-        index = pValue->keys->length(pValue->keys) - 1;
+        // More fast then call __map_indexOfKey() again
+        index = private->keys->class->length(private->keys) - 1;
     }
 
-    pValue->values->set(pValue->values, index, value);
+    private->values->class->set(private->values, index, value);
 }
 
-void *_get_map_value(struct _sys_unsafe_map *this, char *key) {
-    MapValuePrivate *pValue = (MapValuePrivate *) this->_value;
-    int index = indexOfKey(pValue->keys, key);
+void *__map_get(Map *this, char *key) {
+    Private *private = (Private *) this->_private;
+    long int index = __map_indexOfKey(private->keys, key);
 
-    if (index == -1)
+    if (index == -1) //TODO: Catch the element existence by another way. __map_indexOfKey must return unsigned long int
         return NULL;
 
-    return pValue->values->get(pValue->values, index);
+    return private->values->class->get(private->values, (unsigned long int) index);
 }
 
-int _mapLength(struct _sys_unsafe_map *this) {
-    MapSizePrivate *mapSize = (MapSizePrivate *) this->_size;
+unsigned long int __map_length(Map *this) {
+    Private *private = (Private *) this->_private;
 
-    return mapSize->mapSize;
+    return private->mapSize;
 }
 
-String *_MapToString(struct _sys_unsafe_map *this) {
-    int mapLength = this->length(this);
-    MapValuePrivate *mapValue = (MapValuePrivate *) this->_value;
-    List *keys = mapValue->keys;
+String *__map_toString(Map *this) {
+    unsigned long int mapLength = this->class->length(this);
+    Private *private = (Private *) this->_private;
+    List *keys = private->keys;
 
-    String *result = newString("Map(struct _sys_unsafe_map): [ ");
-    for (int index = 0; index < mapLength; index++) {
-        String *k = (String *) keys->get(keys, index);
-        uintptr_t v = (uintptr_t) this->get(this, k->getValue(k));
+    String *result = CreateString("Map: [ ");
+    for (unsigned long int index = 0; index < mapLength; index++) {
+        String *k = (String *) keys->class->get(keys, index);
+        uintptr_t v = (uintptr_t) this->class->get(this, k->class->getValue(k));
 
-        result->add(result, k->getValue(k));
-        result->add(result, ":");
-        result->addULong(result, (unsigned long int) v);
+        result->class->add(result, k->class->getValue(k));
+        result->class->add(result, ":");
+        result->class->addULong(result, (unsigned long int) v);
         if (index != mapLength - 1) {
-            result->add(result, ", ");
+            result->class->add(result, ", ");
         }
     }
 
-    result->add(result, " ] (");
-    result->addULong(result, (unsigned long int) mapLength);
-    result->add(result, ");");
+    result->class->add(result, " ] (");
+    result->class->addULong(result, (unsigned long int) mapLength);
+    result->class->add(result, ");");
 
     return result;
 }
 
-Map *_copyMap(struct _sys_unsafe_map *this) {
-    Map *new = newMap(this->elementSize);
-    MapValuePrivate *nMapValue = (MapValuePrivate *) new->_value;
-    List *nKeys = nMapValue->keys;
-    List *nVals = nMapValue->values;
+Map *__map_copy(Map *this) {
+    Map *newMap = createMap();
+    Private *nmPrivate = (Private *) newMap->_private;
+    List *nKeys = nmPrivate->keys;
+    List *nVals = nmPrivate->values;
 
-    MapValuePrivate *mapValue = (MapValuePrivate *) this->_value;
-    List *keys = mapValue->keys;
-    List *vals = mapValue->values;
+    Private *private = (Private *) this->_private;
+    List *keys = private->keys;
+    List *vals = private->values;
 
-    for (int index = 0; index < this->length(this); index++) {
-        nKeys->push(nKeys, keys->get(keys, index));
-        nVals->push(nVals, vals->get(vals, index));
+    for (unsigned long int index = 0; index < this->class->length(this); index++) {
+        nKeys->class->push(nKeys, keys->class->get(keys, index));
+        nVals->class->push(nVals, vals->class->get(vals, index));
     }
 
-    return new;
+    return newMap;
 }
 
-Map *newMap(int elementSize) {
-    Map *new = (Map *) malloc(sizeof(Map));
+extern Map *createMap() {
+    Map *newMap = (Map *) malloc(sizeof(Map));
 
-    MapValuePrivate *mapValue = (MapValuePrivate *) malloc(sizeof(MapValuePrivate));
-    mapValue->keys   = newList(sizeof(char *));
-    mapValue->values = newList(elementSize);
+    Private *private = (Private *) malloc(sizeof(Private));
+    private->keys    = CreateList();
+    private->values  = CreateList();
+    private->mapSize = 0;
 
-    MapSizePrivate *mapSize = (MapSizePrivate *) malloc(sizeof(MapSizePrivate));
-    mapSize->mapSize = 0;
+    newMap->_private = private;
+    newMap->class    = &ClassMap;
+    newMap->_class   = &classMap;
 
-    new->_value      = mapValue;
-    new->_size       = (int *) mapSize;
-    new->elementSize = elementSize;
-    new->remove      = &_removeElement;
-    new->set         = &_set_map_value;
-    new->get         = &_get_map_value;
-    new->length      = &_mapLength;
-    new->toString    = &_MapToString;
-    new->copy        = &_copyMap;
-
-    return new;
+    return newMap;
 }
 
-void deleteMap(Map *this) {
-    MapSizePrivate  *mapSize  = (MapSizePrivate  *) this->_size;
-    MapValuePrivate *mapValue = (MapValuePrivate *) this->_value;
+void __map_delete(void *this) {
+    Private *private = (Private *) ((Map *) this)->_private;
 
-    free(mapSize);
-    deleteList(mapValue->keys);
-    deleteList(mapValue->values);
-    free(mapValue);
+    delete(private->keys);
+    delete(private->values);
+    free(private);
     free(this);
 }
+
+extern ClassMapType ClassMap = {
+    .remove      = &__map_remove,
+    .set         = &__map_set,
+    .get         = &__map_get,
+    .length      = &__map_length,
+    .toString    = &__map_toString,
+    .copy        = &__map_copy
+};
+
+extern Class classMap = {
+    .classType = CLASS_MAP,
+    .delete    = &__map_delete
+};

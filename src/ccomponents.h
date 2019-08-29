@@ -1,114 +1,141 @@
 #ifndef __C_COMPONENTS_H__
 #define __C_COMPONENTS_H__
 
-#ifndef __cplusplus
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <stdbool.h>
 
-struct _sys_unsafe_list;
-struct _sys_unsafe_map;
-struct _sys_string;
+#define delete(object) (object->_class->delete(object))
 
-typedef struct _sys_unsafe_list {
-    /* 
-     * Private value, do not even try!)
-     */
-    void *_value;
-    /* 
-     * Private size, do not even try too!)
-     */
-    int  *_size;
-    /*
-     * The size of the list item. Required for memory allocation (preferably not to change)
-     */
-    int  elementSize;
+typedef enum _ccomp_classtype {
+    CLASS_MAP,
+    CLASS_LIST,
+    CLASS_STRING
+} ClassType;
+
+typedef struct _ccomp_class {
+    ClassType classType;
+    void (*delete)(void *instance);
+} Class;
+
+/*
+ * Classes pre-declaration
+ */
+
+typedef struct _ccomp_list_class ClassListType;
+typedef struct _ccomp_list List;
+typedef struct _ccomp_map_class ClassMapType;
+typedef struct _ccomp_map Map;
+typedef struct _ccomp_string_class ClassStringType;
+typedef struct _ccomp_string String;
+
+/*
+ *  List
+ * 
+ *  
+ */ 
+
+extern Class classList;
+extern ClassListType ClassList;
+
+struct _ccomp_list_class {
     /*
      * Adds an item to the list.
      */
-    void (*push)(struct _sys_unsafe_list *this, void *value);
+    void (*push)(List *this, void *value);
     /*
      * Removes an item from the list with offset
      */
-    void (*remove)(struct _sys_unsafe_list *this, int index);
+    void (*remove)(List *this, unsigned long int index);
     /*
      * Replaces list item by index
      */
-    void (*set)(struct _sys_unsafe_list *this, int index, void *value);
+    void (*set)(List *this, unsigned long int index, void *value);
     /*
      * Returns a list item by index
      */
-    void *(*get)(struct _sys_unsafe_list *this, int index);
+    void *(*get)(List *this, unsigned long int index);
     /*
      * Returns the length of the array
      */
-    int  (*length)(struct _sys_unsafe_list *this);
+    unsigned long int (*length)(List *this);
     /*
      * toString standart realization
      */
-    struct _sys_string *(*toString)(struct _sys_unsafe_list *this);
+    String *(*toString)(List *this);
     /*
      * Adds elements of array to list
      */
-    void (*include)(struct _sys_unsafe_list *this, void **, int);
+    void (*include)(List *this, void **, unsigned long int);
     /*
      * Returns a copy of List
      */
-    struct _sys_unsafe_list *(*copy)(struct _sys_unsafe_list *this);
-} List;
+    List *(*copy)(List *this);
+};
 
-List *newList(int elementSize);
-void deleteList(List *this);
+struct _ccomp_list {
+    Class *_class;
+    ClassListType *class;
+    void *_private;
+};
 
-typedef struct _sys_unsafe_map {
-    /* 
-     * Private value, do not even try!)
-     */
-    void *_value;
-    /* 
-     * Private size, do not even try too!)
-     */
-    int  *_size;
-    /*
-     * The size of the map item. Required for memory allocation (preferably not to change)
-     */
-    int  elementSize;
+extern List *createList();
+
+#define CreateList createList
+
+/*
+ *  Map
+ * 
+ *  
+ */ 
+
+extern Class classMap;
+extern ClassMapType ClassMap;
+
+struct _ccomp_map_class {
     /*
      * Removes an item from the map
      */
-    void (*remove)(struct _sys_unsafe_map *this, char *key);
+    void (*remove)(Map *this, char *key);
     /*
      * Replaces map item
      */
-    void (*set)(struct _sys_unsafe_map *this, char *key, void *value);
+    void (*set)(Map *this, char *key, void *value);
     /*
      * Returns a map item
      */
-    void *(*get)(struct _sys_unsafe_map *this, char *_value);
+    void *(*get)(Map *this, char *_value);
     /*
      * Returns the length of the map
      */
-    int  (*length)(struct _sys_unsafe_map *this);
+    unsigned long int (*length)(Map *this);
     /*
      * toString standart realization
      */
-    struct _sys_string *(*toString)(struct _sys_unsafe_map *this);
+    String *(*toString)(Map *this);
     /*
      * Returns a copy of List
      */
-    struct _sys_unsafe_map *(*copy)(struct _sys_unsafe_map *this);
-} Map;
+    Map *(*copy)(Map *this);
+};
 
-Map *newMap(int elementSize);
-void deleteMap(Map *this);
+struct _ccomp_map {
+    Class *_class;
+    ClassMapType *class;
+    void *_private;
+};
 
-#define newString(X)      \
-    _Generic((X),         \
-    char *   : newStringChar,\
-    int      : newStringLong,\
-    long int : newStringLong,\
-    unsigned long int : newStringULong,\
-    unsigned int      : newStringULong\
-    ) (X)
+extern Map *createMap();
+
+#define CreateMap createMap
+
+/*
+ *  String
+ * 
+ *  
+ */ 
 
 /*
  * The structure that stores the match (for the match method of String).
@@ -119,19 +146,18 @@ typedef struct _sys_string_match {
     int end;
 } StringMatch;
 
-typedef struct _sys_string {
-    /* 
-     * Private value, do not even try!)
-     */
-    void *_value;
+extern Class classString;
+extern ClassStringType ClassString;
+
+struct _ccomp_string_class {
     /*
      * Returns the String value.
      */
-    char *(*getValue)(struct _sys_string *this);
+    char *(*getValue)(String *this);
     /*
      * Sets the value to String
      */
-    void (*setValue)(struct _sys_string *this, char *);
+    void (*setValue)(String *this, char *);
     /*
      * Concatenates the value of the current String and the second argument of the method.
      * The result is written to the current String
@@ -140,7 +166,7 @@ typedef struct _sys_string {
      *     s->add(s, "world!");
      *     printf("%s\n", s->getValue(s)); // output: "Hello worlrd!"
      */
-    void (*add)(struct _sys_string *this, char *);
+    void (*add)(String *this, char *);
     /*
      * Returns a substring of the current String between two indices, inclusive
      *   Example:
@@ -149,7 +175,7 @@ typedef struct _sys_string {
      *     String *right = s->sub(s, 3, 3);
      *     printf("%s%s\n", left->getValue(left), right->getValue(right)); // output: "lol"
      */
-    struct _sys_string *(*sub)(struct _sys_string *this, int, int);
+    String *(*sub)(String *this, int, int);
     /* 
      * Replaces in the value of the current String all matches on the regex-pattern with the value
      * passed by the last argument
@@ -158,7 +184,7 @@ typedef struct _sys_string {
      *     s->replace(s, "l", "he");
      *     printf("%s\n", s->getValue(s)); // output: "Heheheo worhed!" 
      */
-    void (*replace)(struct _sys_string *this, char *, char *);
+    void (*replace)(String *this, char *, char *);
     /* 
      * Replaces the value of the current String with the first match of the regex pattern with the value
      * passed by the last argument
@@ -167,7 +193,7 @@ typedef struct _sys_string {
      *     s->replaceFirst(s, "l", "he");
      *     printf("%s\n", s->getValue(s)); // output: "Hehelo world!" 
      */
-    void (*replaceFirst)(struct _sys_string *this, char *, char *);
+    void (*replaceFirst)(String *this, char *, char *);
     /*
      * Returns an array of n StringMatch elements.
      * The second argument is the char * that contains the regular expression.
@@ -185,55 +211,71 @@ typedef struct _sys_string {
      *     deleteString(regex);
      *     deleteString(s);
      */
-    StringMatch *(*match)(struct _sys_string *this, char *, int);
+    StringMatch *(*match)(String *this, char *, int);
     /*
      * Returns an sys/list of String *
      */
-    struct _sys_unsafe_list *(*split)(struct _sys_string *this, char *);
+    List *(*split)(String *this, char *);
     /*
      * Adds a long integer to a string.
      */
-    void (*addLong)(struct _sys_string *this, long int);
+    void (*addLong)(String *this, long int);
     /*
      * Adds a unsigned long integer to a string.
      */
-    void (*addULong)(struct _sys_string *this, unsigned long int);
+    void (*addULong)(String *this, unsigned long int);
     /*
      * Attempts to convert a string to a number.
      * On unsuccessful attempt returns 0
      */
-    int (*toInt)(struct _sys_string *this);
+    int (*toInt)(String *this);
     /*
      * Returns a character from a string by index
      */
-    char (*charAt)(struct _sys_string *this, int);
+    char (*charAt)(String *this, int);
     /*
      * Returns the length of a string.
      */
-    int (*length)(struct _sys_string *this);
+    int (*length)(String *this);
     /*
      * Returns the result of comparing two Strings.
      */
-    bool (*equals)(struct _sys_string *this, struct _sys_string *);
+    bool (*equals)(String *this, String *);
     /*
      * Returns the result of comparing a String and a pointer to a character.
      */
-    bool (*equalsChr)(struct _sys_string *this, char *);
+    bool (*equalsChr)(String *this, char *);
     /*
      * toString standart realization
      */
-    struct _sys_string *(*toString)(struct _sys_string *this);
+    String *(*toString)(String *this);
     /*
      * Returns a copy of String
      */
-    struct _sys_string *(*copy)(struct _sys_string *this);
-} String;
+    String *(*copy)(String *this);
+};
 
-String *newStringChar(char *);
-String *newStringLong(long int);
-String *newStringULong(unsigned long int);
-void    deleteString(String *);
+struct _ccomp_string {
+    Class *_class;
+    ClassStringType *class;
+    void *_private;
+};
 
+String *createStringChar(char *);
+String *createStringLong(long int);
+String *createStringULong(unsigned long int);
+
+#define CreateString(X)      \
+    _Generic((X),         \
+    char *   : createStringChar,\
+    int      : createStringLong,\
+    long int : createStringLong,\
+    unsigned long int : createStringULong,\
+    unsigned int      : createStringULong\
+    ) (X)
+
+#ifdef __cplusplus
+}
 #endif /* __cplusplus */
 
 #endif /* __C_COMPONENTS_H__ */

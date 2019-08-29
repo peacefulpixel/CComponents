@@ -7,10 +7,9 @@
 int main(int argc, char **argv) {
 
     // Testing constructor
-    Map *map = newMap(sizeof(char **));
+    Map *map = CreateMap();
     
-    assert(map->length(map) == 0);
-    assert(map->elementSize == sizeof(char **));
+    assert(ClassMap.length(map) == 0);
 
     // Testing set() & get()
     char *testData[4] =
@@ -18,36 +17,36 @@ int main(int argc, char **argv) {
             "Hel", "lo ", "wor", "ld!"
         };
     
-    map->set(map, "0", testData[0]);
-    map->set(map, "1", testData[1]);
-    map->set(map, "2", testData[2]);
-    map->set(map, "3", testData[3]);
+    ClassMap.set(map, "0", testData[0]);
+    ClassMap.set(map, "1", testData[1]);
+    ClassMap.set(map, "2", testData[2]);
+    ClassMap.set(map, "3", testData[3]);
 
-    map->set(map, "2", testData[0]);
+    ClassMap.set(map, "2", testData[0]);
 
-    assert(map->length(map) == 4);
-    assert(map->get(map, "2") == map->get(map, "0"));
+    assert(ClassMap.length(map) == 4);
+    assert(ClassMap.get(map, "2") == ClassMap.get(map, "0"));
 
     // Testing remove() & get()
-    map->remove(map, "0");
+    ClassMap.remove(map, "0");
 
-    assert(map->length(map) == 3);
-    assert(!(strcmp(map->get(map, "1"), testData[1])) &&
-           !(strcmp(map->get(map, "2"), testData[0])) &&
-           !(strcmp(map->get(map, "3"), testData[3])) );
+    assert(ClassMap.length(map) == 3);
+    assert(!(strcmp(ClassMap.get(map, "1"), testData[1])) &&
+           !(strcmp(ClassMap.get(map, "2"), testData[0])) &&
+           !(strcmp(ClassMap.get(map, "3"), testData[3])) );
 
     // Testing toString()
-    String *mapAsString = map->toString(map);
-    deleteString(mapAsString);
+    String *mapAsString = ClassMap.toString(map);
+    delete(mapAsString);
 
     // Testing copy()
-    Map *copy = map->copy(map);
-    assert(!(strcmp(copy->get(copy, "1"), testData[1])) &&
-           !(strcmp(copy->get(copy, "2"), testData[0])) &&
-           !(strcmp(copy->get(copy, "3"), testData[3])) );
+    Map *copy = ClassMap.copy(map);
+    assert(!(strcmp(ClassMap.get(copy, "1"), testData[1])) &&
+           !(strcmp(ClassMap.get(copy, "2"), testData[0])) &&
+           !(strcmp(ClassMap.get(copy, "3"), testData[3])) );
 
-    deleteMap(copy);
-    deleteMap(map);
+    delete(copy);
+    delete(map);
 
     return 0;
 }

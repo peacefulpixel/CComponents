@@ -1,131 +1,133 @@
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "ccomponents.h"
 
-typedef struct _list_value_private {
+#define P_SIZE sizeof(intptr_t)
+
+typedef struct _list_private {
     void **listValue;
-} ListValuePrivate;
+    unsigned long int listSize;
+} Private;
 
-typedef struct _list_size_private {
-    int listSize;
-} ListSizePrivate;
-
-void _push(struct _sys_unsafe_list *this, void *value) {
-    ListSizePrivate  *listSize  = (ListSizePrivate  *) this->_size;
-    ListValuePrivate *thisValue = (ListValuePrivate *) this->_value;
-
-    ListValuePrivate *oldValue  = (ListValuePrivate *) malloc(sizeof(ListValuePrivate));
+void __list_push(List *this, void *value) {
+    Private *private = (Private *) this->_private;
+    Private *oldPrivate  = (Private *) malloc(sizeof(Private));
     
-    int arraySize = this->elementSize * listSize->listSize;
-    oldValue->listValue = (void **) malloc((size_t) arraySize);
-    memcpy(oldValue->listValue, thisValue->listValue, (size_t) arraySize);
+    unsigned long int arraySize = P_SIZE * private->listSize;
+    oldPrivate->listValue = (void **) malloc((size_t) arraySize);
+    memcpy(oldPrivate->listValue, private->listValue, (size_t) arraySize);
     
-    thisValue->listValue = (void **) malloc((size_t) (arraySize + this->elementSize));
-    memcpy(thisValue->listValue, oldValue->listValue, (size_t) arraySize);
+    private->listValue = (void **) malloc((size_t) (arraySize + P_SIZE));
+    memcpy(private->listValue, oldPrivate->listValue, (size_t) arraySize);
 
-    memcpy(&thisValue->listValue[listSize->listSize], &value, (size_t) this->elementSize);
-    listSize->listSize++;
+    memcpy(&private->listValue[private->listSize], &value, (size_t) P_SIZE);
+    private->listSize++;
 
-    free(oldValue->listValue);
-    free(oldValue);
+    free(oldPrivate->listValue);
+    free(oldPrivate);
 }
 
-void _remove(struct _sys_unsafe_list *this, int index) {
-    ListSizePrivate  *listSize  = (ListSizePrivate  *) this->_size;
-    ListValuePrivate *thisValue = (ListValuePrivate *) this->_value;
+void __list_remove(List *this, unsigned long int index) {
+    Private *private = (Private *) this->_private;
 
-    ListValuePrivate *oldValue  = (ListValuePrivate *) malloc(sizeof(ListValuePrivate));
-    oldValue->listValue = thisValue->listValue;
+    Private *oldPrivate  = (Private *) malloc(sizeof(Private));
+    oldPrivate->listValue = private->listValue;
 
-    int arraySize = this->elementSize * (listSize->listSize - 1);
-    thisValue->listValue = (void **) malloc((size_t) arraySize);
+    unsigned long int arraySize = P_SIZE * (private->listSize - 1);
+    private->listValue = (void **) malloc((size_t) arraySize);
     
-    memcpy(thisValue->listValue, oldValue->listValue, (size_t) (index * this->elementSize));
-    memcpy(thisValue->listValue + index,
-            oldValue->listValue + (index + 1), 
-            (size_t) (arraySize + this->elementSize - (index + 1) * this->elementSize));
+    memcpy(private->listValue, oldPrivate->listValue, (size_t) (index * P_SIZE));
+    memcpy(private->listValue + index,
+            oldPrivate->listValue + (index + 1), 
+            (size_t) (arraySize + P_SIZE - (index + 1) * P_SIZE));
 
-    listSize->listSize--;
+    private->listSize--;
 
-    free(oldValue->listValue);
-    free(oldValue);
+    free(oldPrivate->listValue);
+    free(oldPrivate);
 }
 
-void _set(struct _sys_unsafe_list *this, int index, void *value) {
-    ListValuePrivate *thisValue = (ListValuePrivate *) this->_value;
+void __list_set(List *this, unsigned long int index, void *value) {
+    Private *private = (Private *) this->_private;
 
-    memcpy(&thisValue->listValue[index], &value, (size_t) this->elementSize);
+    memcpy(&private->listValue[index], &value, (size_t) P_SIZE);
 }
 
-void *_get(struct _sys_unsafe_list *this, int index) {
-    ListValuePrivate *thisValue = (ListValuePrivate *) this->_value;
+void *__list_get(List *this, unsigned long int index) {
+    Private *private = (Private *) this->_private;
 
-    return thisValue->listValue[index];
+    return private->listValue[index];
 }
 
-int _listLength(struct _sys_unsafe_list *this) {
-    return ((ListSizePrivate *) this->_size)->listSize;
+unsigned long int __list_length(List *this) {
+    return ((Private *) this->_private)->listSize;
 }
 
-String *_ListToString(struct _sys_unsafe_list *this) {
-    int listLength = this->length(this);
-    String *result = newString("List(struct _sys_unsafe_list): [ ");
+String *__list_toString(List *this) {
+    unsigned long int listLength = __list_length(this);
+    String *result = CreateString("List: [ ");
 
-    for (int index = 0; index < listLength; index++) {
-        result->addULong(result, (unsigned long int) this->get(this, index));
+    for (unsigned long int index = 0; index < listLength; index++) {
+        result->class->addULong(result, (unsigned long int) this->class->get(this, index));
         if (index != (listLength - 1)) {
-            result->add(result, ", ");
+            result->class->add(result, ", ");
         }
     }
 
-    result->add(result, " ] (");
-    result->addULong(result, (unsigned long int) this->length(this));
-    result->add(result, ");");
+    result->class->add(result, " ] (");
+    result->class->addULong(result, (unsigned long int) this->class->length(this));
+    result->class->add(result, ");");
     return result;
 }
 
-void _include(struct _sys_unsafe_list *this, void **array, int count) {
+void __list_include(List *this, void **array, unsigned long int count) {
     for (int index = 0; index < count; index++) {
-        this->push(this, *(array + index));
+        this->class->push(this, *(array + index));
     }
 }
 
-List *_copyList(struct _sys_unsafe_list *this) {
-    ListSizePrivate  *listSize  = (ListSizePrivate  *) this->_size;
-    ListValuePrivate *listValue = (ListValuePrivate *) this->_value;
+List *__list_copy(List *this) {
+    Private *private = (Private *) this->_private;
 
-    List *new = newList(this->elementSize);
-    new->include(new, listValue->listValue, listSize->listSize);
+    List *newList = CreateList();
+    newList->class->include(newList, private->listValue, private->listSize);
 
-    return new;
+    return newList;
 }
 
-List *newList(int elementSize) {
-    List *new             = (List *) malloc(sizeof(List));
-    ListSizePrivate *listSize = (ListSizePrivate *) malloc(sizeof(ListSizePrivate));
-    listSize->listSize   = 0;
-    new->_value      = malloc(sizeof(ListValuePrivate));
-    new->_size       = (void *) listSize;
-    new->elementSize = elementSize;
-    new->push        = &_push;
-    new->remove      = &_remove;
-    new->set         = &_set;
-    new->get         = &_get;
-    new->length      = &_listLength;
-    new->toString    = &_ListToString;
-    new->include     = &_include;
-    new->copy        = &_copyList;
+extern List *createList() {
+    List *newList = (List *) malloc(sizeof(List));
+    Private *private = (Private *) malloc(sizeof(Private));
+    private->listSize = 0;
+    newList->_private = private;
+    newList->class = &ClassList;
+    newList->_class = &classList;
 
-    return new;
+    return newList;
 }
 
-void deleteList(List *this) {
-    ListSizePrivate  *listSize  = (ListSizePrivate  *) this->_size;
-    ListValuePrivate *listValue = (ListValuePrivate *) this->_value;
+void __list_delete(void *this) {
+    Private *private = (Private *) ((List *) this)->_private;
 
-    free(listSize);
-    free(listValue->listValue);
-    free(listValue);
+    free(private->listValue);
+    free(private);
     free(this);
 }
+
+extern ClassListType ClassList = {
+    .push     = &__list_push,
+    .remove   = &__list_remove,
+    .set      = &__list_set,
+    .get      = &__list_get,
+    .length   = &__list_length,
+    .toString = &__list_toString,
+    .include  = &__list_include,
+    .copy     = &__list_copy
+};
+
+extern Class classList = {
+    .classType = CLASS_LIST,
+    .delete    = &__list_delete
+};
