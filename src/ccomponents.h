@@ -7,6 +7,9 @@ extern "C" {
 
 #include <stdbool.h>
 
+#ifdef delete(object)
+#error Macro delete(object) already defined
+#endif /* delete(object) */
 #define delete(object) (object->_class->delete(object))
 
 typedef enum _ccomp_classtype {
@@ -83,6 +86,9 @@ struct _ccomp_list {
 
 extern List *createList();
 
+#ifdef CreateList
+#error Macro CreateList already defined
+#endif /* CreateList */
 #define CreateList createList
 
 /*
@@ -129,6 +135,9 @@ struct _ccomp_map {
 
 extern Map *createMap();
 
+#ifdef CreateMap
+#error Macro CreateMap already defined
+#endif /* CreateMap */
 #define CreateMap createMap
 
 /*
@@ -265,6 +274,9 @@ extern String *createStringChar(char *);
 extern String *createStringLong(long int);
 extern String *createStringULong(unsigned long int);
 
+#ifdef CreateString(X)
+#error Macro CreateString(X) already defined
+#endif /* CreateString(X) */
 #define CreateString(X)      \
     _Generic((X),         \
     char *   : createStringChar,\
