@@ -11,7 +11,7 @@ typedef struct _list_private {
     unsigned long int listSize;
 } Private;
 
-void __list_push(List *this, void *value) {
+static void __list_push(List *this, void *value) {
     Private *private = (Private *) this->_private;
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
     
@@ -29,7 +29,7 @@ void __list_push(List *this, void *value) {
     free(oldPrivate);
 }
 
-void __list_remove(List *this, unsigned long int index) {
+static void __list_remove(List *this, unsigned long int index) {
     Private *private = (Private *) this->_private;
 
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
@@ -49,23 +49,23 @@ void __list_remove(List *this, unsigned long int index) {
     free(oldPrivate);
 }
 
-void __list_set(List *this, unsigned long int index, void *value) {
+static void __list_set(List *this, unsigned long int index, void *value) {
     Private *private = (Private *) this->_private;
 
     memcpy(&private->listValue[index], &value, (size_t) P_SIZE);
 }
 
-void *__list_get(List *this, unsigned long int index) {
+static void *__list_get(List *this, unsigned long int index) {
     Private *private = (Private *) this->_private;
 
     return private->listValue[index];
 }
 
-unsigned long int __list_length(List *this) {
+static unsigned long int __list_length(List *this) {
     return ((Private *) this->_private)->listSize;
 }
 
-String *__list_toString(List *this) {
+static String *__list_toString(List *this) {
     unsigned long int listLength = __list_length(this);
     String *result = CreateString("List: [ ");
 
@@ -82,13 +82,13 @@ String *__list_toString(List *this) {
     return result;
 }
 
-void __list_include(List *this, void **array, unsigned long int count) {
+static void __list_include(List *this, void **array, unsigned long int count) {
     for (int index = 0; index < count; index++) {
         this->class->push(this, *(array + index));
     }
 }
 
-List *__list_copy(List *this) {
+static List *__list_copy(List *this) {
     Private *private = (Private *) this->_private;
 
     List *newList = CreateList();
@@ -108,7 +108,7 @@ extern List *createList() {
     return newList;
 }
 
-void __list_delete(void *this) {
+static void __list_delete(void *this) {
     Private *private = (Private *) ((List *) this)->_private;
 
     free(private->listValue);

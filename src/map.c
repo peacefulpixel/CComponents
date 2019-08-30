@@ -11,7 +11,7 @@ typedef struct _map_private {
     unsigned long int mapSize;
 } Private;
 
-long int __map_indexOfKey(List *keys, char *key) {
+static long int __map_indexOfKey(List *keys, char *key) {
     for (unsigned long int index = 0; index < keys->class->length(keys); index++) {
         String *currentKey = (String *) keys->class->get(keys, index);
         if (currentKey->class->equalsChr(currentKey, key))
@@ -19,7 +19,7 @@ long int __map_indexOfKey(List *keys, char *key) {
     } return -1;
 }
 
-void __map_remove(Map *this, char *key) {
+static void __map_remove(Map *this, char *key) {
     Private *private = (Private *) this->_private;
 
     unsigned long int index = __map_indexOfKey(private->keys, key);
@@ -31,7 +31,7 @@ void __map_remove(Map *this, char *key) {
     private->mapSize--;
 }
 
-void __map_set(Map *this, char *key, void *value) {
+static void __map_set(Map *this, char *key, void *value) {
     Private *private = (Private *) this->_private;
     unsigned long int index = __map_indexOfKey(private->keys, key);
 
@@ -52,7 +52,7 @@ void __map_set(Map *this, char *key, void *value) {
     private->values->class->set(private->values, index, value);
 }
 
-void *__map_get(Map *this, char *key) {
+static void *__map_get(Map *this, char *key) {
     Private *private = (Private *) this->_private;
     long int index = __map_indexOfKey(private->keys, key);
 
@@ -62,13 +62,13 @@ void *__map_get(Map *this, char *key) {
     return private->values->class->get(private->values, (unsigned long int) index);
 }
 
-unsigned long int __map_length(Map *this) {
+static unsigned long int __map_length(Map *this) {
     Private *private = (Private *) this->_private;
 
     return private->mapSize;
 }
 
-String *__map_toString(Map *this) {
+static String *__map_toString(Map *this) {
     unsigned long int mapLength = this->class->length(this);
     Private *private = (Private *) this->_private;
     List *keys = private->keys;
@@ -93,7 +93,7 @@ String *__map_toString(Map *this) {
     return result;
 }
 
-Map *__map_copy(Map *this) {
+static Map *__map_copy(Map *this) {
     Map *newMap = createMap();
     Private *nmPrivate = (Private *) newMap->_private;
     List *nKeys = nmPrivate->keys;
@@ -126,7 +126,7 @@ extern Map *createMap() {
     return newMap;
 }
 
-void __map_delete(void *this) {
+static void __map_delete(void *this) {
     Private *private = (Private *) ((Map *) this)->_private;
 
     delete(private->keys);

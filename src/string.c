@@ -13,12 +13,12 @@ typedef struct _string_private {
     char *stringValue;
 } Private;
 
-char *__string_get(String *this) {
+static char *__string_get(String *this) {
     Private *private = (Private *) this->_private;
     return private->stringValue;
 }
 
-void __string_set(String *this, char *value) {
+static void __string_set(String *this, char *value) {
     int memSize = (int) (sizeof(char) * strlen(value));
 
     free(((Private *) this->_private)->stringValue);
@@ -30,7 +30,7 @@ void __string_set(String *this, char *value) {
     memcpy(stringValue->stringValue + memSize, "\0", 1);
 }
 
-void __string_add(String *this, char *value) {
+static void __string_add(String *this, char *value) {
     int aSize = (int) (sizeof(char) * strlen(this->class->getValue(this)));
     int bSize = (int) (sizeof(char) * strlen(value));
 
@@ -47,7 +47,7 @@ void __string_add(String *this, char *value) {
     free(aDump);
 }
 
-String *__string_sub(String *this, int begin, int end) {
+static String *__string_sub(String *this, int begin, int end) {
     int size = (int) sizeof(char) * (end - begin);
 
     char *newValue = (char *) malloc((size_t) size + 1);
@@ -60,7 +60,7 @@ String *__string_sub(String *this, int begin, int end) {
     return newString;
 }
 
-void __string_replace(String *this, char *regex, char *value) {
+static void __string_replace(String *this, char *regex, char *value) {
     String *current = createStringChar(this->class->getValue(this));
     StringMatch *match = current->class->match(current, regex, 1);
 
@@ -93,7 +93,7 @@ void __string_replace(String *this, char *regex, char *value) {
     delete(builder);
 }
 
-void __string_replaceFirst(String *this, char *regex, char *value) {
+static void __string_replaceFirst(String *this, char *regex, char *value) {
     StringMatch *match = this->class->match(this, regex, 1);
 
     if (match->begin == -1 || match->begin == -2)
@@ -114,7 +114,7 @@ void __string_replaceFirst(String *this, char *regex, char *value) {
     free(newValue);
 }
 
-StringMatch *__string_match(String *this, char *regex, int maxMatchesCount) {
+static StringMatch *__string_match(String *this, char *regex, int maxMatchesCount) {
     regex_t regexObject;
 
     StringMatch *matchesResult = (StringMatch *) malloc((size_t) maxMatchesCount * sizeof(matchesResult));
@@ -151,7 +151,7 @@ StringMatch *__string_match(String *this, char *regex, int maxMatchesCount) {
     return matchesResult;
 }
 
-List *__string_split(String *this, char *regex) {
+static List *__string_split(String *this, char *regex) {
     StringMatch *match = this->class->match(this, regex, 1);
     List *result = CreateList((int) sizeof(String *));
 
@@ -171,21 +171,21 @@ List *__string_split(String *this, char *regex) {
     return result;
 }
 
-void __string_addLong(String *this, long int number) {
+static void __string_addLong(String *this, long int number) {
     String *numberTemp = createStringLong(number);
     this->class->add(this, numberTemp->class->getValue(numberTemp));
 
     delete(numberTemp);
 }
 
-void __string_addULong(String *this, unsigned long int number) {
+static void __string_addULong(String *this, unsigned long int number) {
     String *numberTemp = createStringULong(number);
     this->class->add(this, numberTemp->class->getValue(numberTemp));
 
     delete(numberTemp);
 }
 
-int __string_toInt(String *this) {
+static int __string_toInt(String *this) {
     int thisLength = this->class->length(this);
     int zeroCount = thisLength - 1;
 
@@ -215,33 +215,33 @@ int __string_toInt(String *this) {
     return result;
 }
 
-char __string_charAt(String *this, int index) {
+static char __string_charAt(String *this, int index) {
     return this->class->getValue(this)[index];
 }
 
-int __string_stringLength(String *this) {
+static int __string_stringLength(String *this) {
     return (int) strlen(this->class->getValue(this));
 }
 
-bool __string_equals(String *this, String *subject) {
+static bool __string_equals(String *this, String *subject) {
     return (bool) strcmp(this->class->getValue(this), subject->class->getValue(subject)) == 0;
 }
 
-bool __string_equalsChr(String *this, char *subject) {
+static bool __string_equalsChr(String *this, char *subject) {
     return (bool) strcmp(this->class->getValue(this), subject) == 0;
 }
 
-String *__string_toString(String *this) {
+static String *__string_toString(String *this) {
     return this->class->copy(this);
 }
 
-String *__string_copy(String *this) {
+static String *__string_copy(String *this) {
     String *newString = createStringChar(this->class->getValue(this));
 
     return newString;
 }
 
-String *createStringNull(void *value) {
+static String *createStringNull(void *value) {
     String *newString   = (String *) malloc(sizeof(String));
     newString->_private = NULL;
     newString->class    = &ClassString;
@@ -250,7 +250,7 @@ String *createStringNull(void *value) {
     return newString;
 }
 
-String *createStringChar(char *value) {
+extern String *createStringChar(char *value) {
     int memSize = (int) (sizeof(char) * strlen(value));
 
     String *newString = createStringNull(NULL);
@@ -265,7 +265,7 @@ String *createStringChar(char *value) {
     return newString;
 }
 
-String *__createStringLong(long int number, bool isUnsigned) {
+static String *__createStringLong(long int number, bool isUnsigned) {
     String *newString = createStringNull(NULL);
     newString->_private = malloc(sizeof(Private));
     Private *private = (Private *) newString->_private;
@@ -284,15 +284,15 @@ String *__createStringLong(long int number, bool isUnsigned) {
     return newString;
 }
 
-String *createStringLong(long int number) {
+extern String *createStringLong(long int number) {
     return __createStringLong(number, false);
 }
 
-String *createStringULong(unsigned long int number) {
+extern String *createStringULong(unsigned long int number) {
     return __createStringLong((long int) number, true);
 }
 
-void __string_delete(void *this) {
+static void __string_delete(void *this) {
     Private *stringValue = (Private *) ((String *) this)->_private;
     
     free(stringValue->stringValue);

@@ -261,9 +261,9 @@ struct _ccomp_string {
     void *_private;
 };
 
-String *createStringChar(char *);
-String *createStringLong(long int);
-String *createStringULong(unsigned long int);
+extern String *createStringChar(char *);
+extern String *createStringLong(long int);
+extern String *createStringULong(unsigned long int);
 
 #define CreateString(X)      \
     _Generic((X),         \
