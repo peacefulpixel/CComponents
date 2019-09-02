@@ -71,9 +71,9 @@ int main(int argc, char **argv) {
     assert(ClassString.length(string) == 11);
 
     // Testing split()
-    List *parts = ClassString.split(string, " ");
-    String *part_a = (String *) ClassList.get(parts, 0);
-    String *part_b = (String *) ClassList.get(parts, 1);
+    ArrayList *parts = ClassString.split(string, " ");
+    String *part_a = (String *) ClassArrayList.get(parts, 0);
+    String *part_b = (String *) ClassArrayList.get(parts, 1);
 
     assert(ClassString.equalsChr(part_a, "Heo"));
     assert(ClassString.equalsChr(part_b, "word!93"));

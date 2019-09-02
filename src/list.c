@@ -11,7 +11,7 @@ typedef struct _list_private {
     unsigned long int listSize;
 } Private;
 
-static void __list_push(List *this, void *value) {
+static void __list_push(ArrayList *this, void *value) {
     Private *private = (Private *) this->_private;
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
     
@@ -29,7 +29,7 @@ static void __list_push(List *this, void *value) {
     free(oldPrivate);
 }
 
-static void __list_remove(List *this, unsigned long int index) {
+static void __list_remove(ArrayList *this, unsigned long int index) {
     Private *private = (Private *) this->_private;
 
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
@@ -49,25 +49,25 @@ static void __list_remove(List *this, unsigned long int index) {
     free(oldPrivate);
 }
 
-static void __list_set(List *this, unsigned long int index, void *value) {
+static void __list_set(ArrayList *this, unsigned long int index, void *value) {
     Private *private = (Private *) this->_private;
 
     memcpy(&private->listValue[index], &value, (size_t) P_SIZE);
 }
 
-static void *__list_get(List *this, unsigned long int index) {
+static void *__list_get(ArrayList *this, unsigned long int index) {
     Private *private = (Private *) this->_private;
 
     return private->listValue[index];
 }
 
-static unsigned long int __list_length(List *this) {
+static unsigned long int __list_length(ArrayList *this) {
     return ((Private *) this->_private)->listSize;
 }
 
-static String *__list_toString(List *this) {
+static String *__list_toString(ArrayList *this) {
     unsigned long int listLength = __list_length(this);
-    String *result = CreateString("List: [ ");
+    String *result = CreateString("ArrayList: [ ");
 
     for (unsigned long int index = 0; index < listLength; index++) {
         result->class->addULong(result, (unsigned long int) this->class->get(this, index));
@@ -82,41 +82,41 @@ static String *__list_toString(List *this) {
     return result;
 }
 
-static void __list_include(List *this, void **array, unsigned long int count) {
+static void __list_include(ArrayList *this, void **array, unsigned long int count) {
     for (int index = 0; index < count; index++) {
         this->class->push(this, *(array + index));
     }
 }
 
-static List *__list_copy(List *this) {
+static ArrayList *__list_copy(ArrayList *this) {
     Private *private = (Private *) this->_private;
 
-    List *newList = CreateList();
-    newList->class->include(newList, private->listValue, private->listSize);
+    ArrayList *newArrayList = CreateArrayList();
+    newArrayList->class->include(newArrayList, private->listValue, private->listSize);
 
-    return newList;
+    return newArrayList;
 }
 
-extern List *createList() {
-    List *newList = (List *) malloc(sizeof(List));
+extern ArrayList *createArrayList() {
+    ArrayList *newArrayList = (ArrayList *) malloc(sizeof(ArrayList));
     Private *private = (Private *) malloc(sizeof(Private));
     private->listSize = 0;
-    newList->_private = private;
-    newList->class = &ClassList;
-    newList->_class = &classList;
+    newArrayList->_private = private;
+    newArrayList->class = &ClassArrayList;
+    newArrayList->_class = &classArrayList;
 
-    return newList;
+    return newArrayList;
 }
 
 static void __list_delete(void *this) {
-    Private *private = (Private *) ((List *) this)->_private;
+    Private *private = (Private *) ((ArrayList *) this)->_private;
 
     free(private->listValue);
     free(private);
     free(this);
 }
 
-extern ClassListType ClassList = {
+extern ClassArrayListType ClassArrayList = {
     .push     = &__list_push,
     .remove   = &__list_remove,
     .set      = &__list_set,
@@ -127,7 +127,7 @@ extern ClassListType ClassList = {
     .copy     = &__list_copy
 };
 
-extern Class classList = {
-    .classType = CLASS_LIST,
+extern Class classArrayList = {
+    .classType = CLASS_ARRAY_LIST,
     .delete    = &__list_delete
 };

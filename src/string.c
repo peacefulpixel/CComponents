@@ -151,9 +151,9 @@ static StringMatch *__string_match(String *this, char *regex, int maxMatchesCoun
     return matchesResult;
 }
 
-static List *__string_split(String *this, char *regex) {
+static ArrayList *__string_split(String *this, char *regex) {
     StringMatch *match = this->class->match(this, regex, 1);
-    List *result = CreateList((int) sizeof(String *));
+    ArrayList *result = CreateArrayList((int) sizeof(String *));
 
     String *copy = this->class->sub(this, 0, this->class->length(this));
     while (match->begin != -1) {

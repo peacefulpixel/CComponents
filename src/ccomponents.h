@@ -7,14 +7,14 @@ extern "C" {
 
 #include <stdbool.h>
 
-#ifdef delete(object)
-#error Macro delete(object) already defined
-#endif /* delete(object) */
+#ifdef delete
+#error Macro delete already defined
+#endif /* delete */
 #define delete(object) (object->_class->delete(object))
 
 typedef enum _ccomp_classtype {
-    CLASS_MAP,
-    CLASS_LIST,
+    CLASS_ARRAY_MAP,
+    CLASS_ARRAY_LIST,
     CLASS_STRING
 } ClassType;
 
@@ -23,73 +23,77 @@ typedef struct _ccomp_class {
     void (*delete)(void *instance);
 } Class;
 
-/*
+/**
+ * Interfaces pre-declaration
+ */
+
+/**
  * Classes pre-declaration
  */
 
-typedef struct _ccomp_list_class ClassListType;
-typedef struct _ccomp_list List;
-typedef struct _ccomp_map_class ClassMapType;
-typedef struct _ccomp_map Map;
+typedef struct _ccomp_array_list_class ClassArrayListType;
+typedef struct _ccomp_array_list ArrayList;
+typedef struct _ccomp_array_map_class ClassArrayMapType;
+typedef struct _ccomp_array_map ArrayMap;
 typedef struct _ccomp_string_class ClassStringType;
 typedef struct _ccomp_string String;
 
 /*
- *  List
+ *  ArrayList
  * 
  *  
  */ 
 
-extern Class classList;
-extern ClassListType ClassList;
+extern Class classArrayList;
+extern ClassArrayListType ClassArrayList;
 
-struct _ccomp_list_class {
+struct _ccomp_array_list_class {
     /*
      * Adds an item to the list.
      */
-    void (*push)(List *this, void *value);
+    void (*push)(ArrayList *this, void *value);
     /*
      * Removes an item from the list with offset
      */
-    void (*remove)(List *this, unsigned long int index);
+    void (*remove)(ArrayList *this, unsigned long int index);
     /*
      * Replaces list item by index
      */
-    void (*set)(List *this, unsigned long int index, void *value);
+    void (*set)(ArrayList *this, unsigned long int index, void *value);
     /*
      * Returns a list item by index
      */
-    void *(*get)(List *this, unsigned long int index);
+    void *(*get)(ArrayList *this, unsigned long int index);
     /*
      * Returns the length of the array
      */
-    unsigned long int (*length)(List *this);
+    unsigned long int (*length)(ArrayList *this);
     /*
      * toString standart realization
      */
-    String *(*toString)(List *this);
+    String *(*toString)(ArrayList *this);
     /*
      * Adds elements of array to list
      */
-    void (*include)(List *this, void **, unsigned long int);
+    void (*include)(ArrayList *this, void **, unsigned long int);
     /*
      * Returns a copy of List
      */
-    List *(*copy)(List *this);
+    ArrayList *(*copy)(ArrayList *this);
 };
 
-struct _ccomp_list {
+struct _ccomp_array_list {
     Class *_class;
-    ClassListType *class;
+    ClassArrayListType *class;
     void *_private;
 };
 
-extern List *createList();
+extern ArrayList *createArrayList();
 
-#ifdef CreateList
-#error Macro CreateList already defined
-#endif /* CreateList */
-#define CreateList createList
+#ifdef CreateArrayList
+#error Macro CreateArrayList already defined
+#endif /* CreateArrayList */
+#define CreateArrayList createArrayList
 
 /*
  *  Map
@@ -97,48 +101,48 @@ extern List *createList();
  *  
  */ 
 
-extern Class classMap;
-extern ClassMapType ClassMap;
+extern Class classArrayMap;
+extern ClassArrayMapType ClassArrayMap;
 
-struct _ccomp_map_class {
+struct _ccomp_array_map_class {
     /*
      * Removes an item from the map
      */
-    void (*remove)(Map *this, char *key);
+    void (*remove)(ArrayMap *this, char *key);
     /*
      * Replaces map item
      */
-    void (*set)(Map *this, char *key, void *value);
+    void (*set)(ArrayMap *this, char *key, void *value);
     /*
      * Returns a map item
      */
-    void *(*get)(Map *this, char *_value);
+    void *(*get)(ArrayMap *this, char *_value);
     /*
      * Returns the length of the map
      */
-    unsigned long int (*length)(Map *this);
+    unsigned long int (*length)(ArrayMap *this);
     /*
      * toString standart realization
      */
-    String *(*toString)(Map *this);
+    String *(*toString)(ArrayMap *this);
     /*
      * Returns a copy of List
      */
-    Map *(*copy)(Map *this);
+    ArrayMap *(*copy)(ArrayMap *this);
 };
 
-struct _ccomp_map {
+struct _ccomp_array_map {
     Class *_class;
-    ClassMapType *class;
+    ClassArrayMapType *class;
     void *_private;
 };
 
-extern Map *createMap();
+extern ArrayMap *createArrayMap();
 
-#ifdef CreateMap
-#error Macro CreateMap already defined
-#endif /* CreateMap */
-#define CreateMap createMap
+#ifdef CreateArrayMap
+#error Macro CreateArrayMap already defined
+#endif /* CreateArrayMap */
+#define CreateArrayMap createArrayMap
 
 /*
  *  String
@@ -224,7 +228,7 @@ struct _ccomp_string_class {
     /*
      * Returns an sys/list of String *
      */
-    List *(*split)(String *this, char *);
+    ArrayList *(*split)(String *this, char *);
     /*
      * Adds a long integer to a string.
      */
@@ -274,9 +278,9 @@ extern String *createStringChar(char *);
 extern String *createStringLong(long int);
 extern String *createStringULong(unsigned long int);
 
-#ifdef CreateString(X)
-#error Macro CreateString(X) already defined
-#endif /* CreateString(X) */
+#ifdef CreateString
+#error Macro CreateString already defined
+#endif /* CreateString */
 #define CreateString(X)      \
     _Generic((X),         \
     char *   : createStringChar,\
