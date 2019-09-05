@@ -70,21 +70,21 @@ static String *__list_toString(ArrayList *this) {
     String *result = CreateString("ArrayList: [ ");
 
     for (unsigned long int index = 0; index < listLength; index++) {
-        result->class->addULong(result, (unsigned long int) this->class->get(this, index));
+        result->class->addULong(result, (unsigned long int) this->class->_impl_List.get(this, index));
         if (index != (listLength - 1)) {
             result->class->add(result, ", ");
         }
     }
 
     result->class->add(result, " ] (");
-    result->class->addULong(result, (unsigned long int) this->class->length(this));
+    result->class->addULong(result, (unsigned long int) this->class->_impl_List.length(this));
     result->class->add(result, ");");
     return result;
 }
 
 static void __list_include(ArrayList *this, void **array, unsigned long int count) {
     for (int index = 0; index < count; index++) {
-        this->class->push(this, *(array + index));
+        this->class->_impl_List.push(this, *(array + index));
     }
 }
 
@@ -117,14 +117,20 @@ static void __list_delete(void *this) {
 }
 
 extern ClassArrayListType ClassArrayList = {
-    .push     = &__list_push,
-    .remove   = &__list_remove,
-    .set      = &__list_set,
-    .get      = &__list_get,
-    .length   = &__list_length,
-    .toString = &__list_toString,
-    .include  = &__list_include,
-    .copy     = &__list_copy
+    &__list_include,
+    {
+        INTERFACE_LIST,
+        &__list_push,
+        &__list_remove,
+        &__list_set,
+        &__list_get,
+        &__list_length,
+        {
+            INTERFACE_CCOBJECT,
+            &__list_toString,
+            &__list_copy
+        }
+    }
 };
 
 extern Class classArrayList = {

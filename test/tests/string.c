@@ -72,8 +72,8 @@ int main(int argc, char **argv) {
 
     // Testing split()
     ArrayList *parts = ClassString.split(string, " ");
-    String *part_a = (String *) ClassArrayList.get(parts, 0);
-    String *part_b = (String *) ClassArrayList.get(parts, 1);
+    String *part_a = (String *) ClassArrayList._impl_List.get(parts, 0);
+    String *part_b = (String *) ClassArrayList._impl_List.get(parts, 1);
 
     assert(ClassString.equalsChr(part_a, "Heo"));
     assert(ClassString.equalsChr(part_b, "word!93"));
@@ -93,13 +93,13 @@ int main(int argc, char **argv) {
     delete(new_str);
 
     // Testing toString()
-    String *toStringTest = ClassString.toString(string);
+    String *toStringTest = ClassString._impl_CCObject.toString(string);
     assert(ClassString.equals(toStringTest, string));
 
     delete(toStringTest);
 
     // Testing copy()
-    String *copy = ClassString.copy(string);
+    String *copy = ClassString._impl_CCObject.copy(string);
     assert(ClassString.equals(copy, string));
 
     delete(copy);

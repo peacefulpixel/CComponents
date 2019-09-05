@@ -162,9 +162,9 @@ static ArrayList *__string_split(String *this, char *regex) {
         delete(copy);
         copy = newCopy;
 
-        result->class->push(result, sub);
+        result->class->_impl_List.push(result, sub);
         match = copy->class->match(copy, regex, 1);
-    } result->class->push(result, CreateString(copy->class->getValue(copy)));
+    } result->class->_impl_List.push(result, CreateString(copy->class->getValue(copy)));
 
     delete(copy);
     free(match);
@@ -232,7 +232,7 @@ static bool __string_equalsChr(String *this, char *subject) {
 }
 
 static String *__string_toString(String *this) {
-    return this->class->copy(this);
+    return this->class->_impl_CCObject.copy(this);
 }
 
 static String *__string_copy(String *this) {
@@ -301,23 +301,26 @@ static void __string_delete(void *this) {
 }
 
 extern ClassStringType ClassString = {
-    .getValue     = &__string_get,
-    .setValue     = &__string_set,
-    .add          = &__string_add,
-    .sub          = &__string_sub,
-    .replace      = &__string_replace,
-    .replaceFirst = &__string_replaceFirst,
-    .match        = &__string_match,
-    .split        = &__string_split,
-    .addLong      = &__string_addLong,
-    .addULong     = &__string_addULong,
-    .toInt        = &__string_toInt,
-    .charAt       = &__string_charAt,
-    .length       = &__string_stringLength,
-    .equals       = &__string_equals,
-    .equalsChr    = &__string_equalsChr,
-    .toString     = &__string_toString,
-    .copy         = &__string_copy
+    &__string_get,
+    &__string_set,
+    &__string_add,
+    &__string_sub,
+    &__string_replace,
+    &__string_replaceFirst,
+    &__string_match,
+    &__string_split,
+    &__string_addLong,
+    &__string_addULong,
+    &__string_toInt,
+    &__string_charAt,
+    &__string_stringLength,
+    &__string_equals,
+    &__string_equalsChr,
+    {
+        INTERFACE_CCOBJECT,
+        &__string_toString,
+        &__string_copy
+    }
 };
 
 extern Class classString = {

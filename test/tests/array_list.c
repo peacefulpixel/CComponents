@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     
     // Testing constructor
     ArrayList *list = CreateArrayList();
-    assert(ClassArrayList.length(list) == 0);
+    assert(ClassArrayList._impl_List.length(list) == 0);
 
     // Testing push()
     char *testData[4] =
@@ -17,29 +17,29 @@ int main(int argc, char **argv) {
         };
 
     for (int x = 0; x < 4; x++)
-        ClassArrayList.push(list, testData[x]);
+        ClassArrayList._impl_List.push(list, testData[x]);
 
-    assert(ClassArrayList.length(list) == 4);
+    assert(ClassArrayList._impl_List.length(list) == 4);
 
     for (int x = 0; x < 4; x++) 
-        assert(!(strcmp(ClassArrayList.get(list, x), testData[x])));
+        assert(!(strcmp(ClassArrayList._impl_List.get(list, x), testData[x])));
 
     // Testing set() & get()
-    ClassArrayList.set(list, 2, testData[0]);
+    ClassArrayList._impl_List.set(list, 2, testData[0]);
 
-    assert(ClassArrayList.length(list) == 4);
-    assert(ClassArrayList.get(list, 2) == ClassArrayList.get(list, 0));
+    assert(ClassArrayList._impl_List.length(list) == 4);
+    assert(ClassArrayList._impl_List.get(list, 2) == ClassArrayList._impl_List.get(list, 0));
 
     // Testing remove() & get()
-    ClassArrayList.remove(list, 0);
+    ClassArrayList._impl_List.remove(list, 0);
 
-    assert(ClassArrayList.length(list) == 3);
-    assert(!(strcmp(ClassArrayList.get(list, 0), testData[1])) &&
-           !(strcmp(ClassArrayList.get(list, 1), testData[0])) &&
-           !(strcmp(ClassArrayList.get(list, 2), testData[3])) );
+    assert(ClassArrayList._impl_List.length(list) == 3);
+    assert(!(strcmp(ClassArrayList._impl_List.get(list, 0), testData[1])) &&
+           !(strcmp(ClassArrayList._impl_List.get(list, 1), testData[0])) &&
+           !(strcmp(ClassArrayList._impl_List.get(list, 2), testData[3])) );
 
     // Testing toString()
-    String *listAsString = ClassArrayList.toString(list);
+    String *listAsString = ClassArrayList._impl_List._impl_CCObject.toString(list);
     delete(listAsString);
 
     // Testing include()
@@ -49,18 +49,18 @@ int main(int argc, char **argv) {
         };
 
     ClassArrayList.include(list, (void **) testDataFill, 3);
-    assert(!(strcmp(ClassArrayList.get(list, 3), testDataFill[0])) &&
-           !(strcmp(ClassArrayList.get(list, 4), testDataFill[1])) &&
-           !(strcmp(ClassArrayList.get(list, 5), testDataFill[2])) );
+    assert(!(strcmp(ClassArrayList._impl_List.get(list, 3), testDataFill[0])) &&
+           !(strcmp(ClassArrayList._impl_List.get(list, 4), testDataFill[1])) &&
+           !(strcmp(ClassArrayList._impl_List.get(list, 5), testDataFill[2])) );
 
-    assert(ClassArrayList.length(list) == 6);
+    assert(ClassArrayList._impl_List.length(list) == 6);
 
     // Testing copy()
-    ArrayList *copy = ClassArrayList.copy(list);
-    assert(ClassArrayList.length(copy) == 6);
+    ArrayList *copy = ClassArrayList._impl_List._impl_CCObject.copy(list);
+    assert(ClassArrayList._impl_List.length(copy) == 6);
 
     for (int index = 0; index < 6; index++)
-        assert(ClassArrayList.get(copy, index) == ClassArrayList.get(list, index));
+        assert(ClassArrayList._impl_List.get(copy, index) == ClassArrayList._impl_List.get(list, index));
 
     delete(copy);
     delete(list);

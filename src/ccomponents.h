@@ -13,8 +13,11 @@ extern "C" {
 #define delete(object) (object->_class->delete(object))
 
 typedef enum _ccomp_classtype {
-    CLASS_ARRAY_MAP,
+    INTERFACE_CCOBJECT,
+    INTERFACE_LIST,
+    INTERFACE_MAP,
     CLASS_ARRAY_LIST,
+    CLASS_ARRAY_MAP,
     CLASS_STRING
 } ClassType;
 
@@ -27,6 +30,10 @@ typedef struct _ccomp_class {
  * Interfaces pre-declaration
  */
 
+typedef struct _ccomp_object CCObject; // For case library user will reserves name Object
+typedef struct _ccomp_list List;
+typedef struct _ccomp_map Map;
+
 /**
  * Classes pre-declaration
  */
@@ -38,73 +45,67 @@ typedef struct _ccomp_array_map ArrayMap;
 typedef struct _ccomp_string_class ClassStringType;
 typedef struct _ccomp_string String;
 
-/*
- *  ArrayList
+/**
+ * CCObject
  * 
- *  
- */ 
+ * 
+ */
 
-extern Class classArrayList;
-extern ClassArrayListType ClassArrayList;
+struct _ccomp_object {
+    /**
+     * Type of interface
+     */
+    ClassType interfaceType;
+    /**
+     * Will return serialized Object as String
+     */
+    String *(*toString)(List *this);
+    /*
+     * Returns a copy of current Object
+     */
+    List *(*copy)(List *this);
+};
 
-struct _ccomp_array_list_class {
+/**
+ * List
+ * 
+ * 
+ */
+
+struct _ccomp_list {
+    ClassType interfaceType;
     /*
      * Adds an item to the list.
      */
-    void (*push)(ArrayList *this, void *value);
+    void (*push)(List *this, void *value);
     /*
      * Removes an item from the list with offset
      */
-    void (*remove)(ArrayList *this, unsigned long int index);
+    void (*remove)(List *this, unsigned long int index);
     /*
      * Replaces list item by index
      */
-    void (*set)(ArrayList *this, unsigned long int index, void *value);
+    void (*set)(List *this, unsigned long int index, void *value);
     /*
      * Returns a list item by index
      */
-    void *(*get)(ArrayList *this, unsigned long int index);
+    void *(*get)(List *this, unsigned long int index);
     /*
      * Returns the length of the array
      */
-    unsigned long int (*length)(ArrayList *this);
-    /*
-     * toString standart realization
-     */
-    String *(*toString)(ArrayList *this);
-    /*
-     * Adds elements of array to list
-     */
-    void (*include)(ArrayList *this, void **, unsigned long int);
-    /*
-     * Returns a copy of List
-     */
-    ArrayList *(*copy)(ArrayList *this);
+    unsigned long int (*length)(List *this);
+
+    CCObject _impl_CCObject;
 };
 
-struct _ccomp_array_list {
-    Class *_class;
-    ClassArrayListType *class;
-    void *_private;
-};
-
-extern ArrayList *createArrayList();
-
-#ifdef CreateArrayList
-#error Macro CreateArrayList already defined
-#endif /* CreateArrayList */
-#define CreateArrayList createArrayList
-
-/*
- *  Map
+/**
+ * Map
  * 
- *  
- */ 
+ * 
+ */
 
-extern Class classArrayMap;
-extern ClassArrayMapType ClassArrayMap;
-
-struct _ccomp_array_map_class {
+struct _ccomp_map {
+    ClassType interfaceType;
     /*
      * Removes an item from the map
      */
@@ -121,14 +122,52 @@ struct _ccomp_array_map_class {
      * Returns the length of the map
      */
     unsigned long int (*length)(ArrayMap *this);
+
+    CCObject _impl_CCObject;
+};
+
+/*
+ *  ArrayList
+ * 
+ *  
+ */ 
+
+extern Class classArrayList;
+extern ClassArrayListType ClassArrayList;
+
+struct _ccomp_array_list_class {
     /*
-     * toString standart realization
+     * Adds elements of array to list
      */
-    String *(*toString)(ArrayMap *this);
-    /*
-     * Returns a copy of List
-     */
-    ArrayMap *(*copy)(ArrayMap *this);
+    void (*include)(ArrayList *this, void **, unsigned long int);
+
+    List _impl_List;
+};
+
+struct _ccomp_array_list {
+    Class *_class;
+    ClassArrayListType *class;
+    void *_private;
+};
+
+extern ArrayList *createArrayList();
+
+#ifdef CreateArrayList
+#error Macro CreateArrayList already defined
+#endif /* CreateArrayList */
+#define CreateArrayList createArrayList
+
+/*
+ *  ArrayMap
+ * 
+ *  
+ */ 
+
+extern Class classArrayMap;
+extern ClassArrayMapType ClassArrayMap;
+
+struct _ccomp_array_map_class {
+    Map _impl_Map;
 };
 
 struct _ccomp_array_map {
@@ -193,7 +232,7 @@ struct _ccomp_string_class {
      * Replaces in the value of the current String all matches on the regex-pattern with the value
      * passed by the last argument
      *   Example:
-     *     String *s = newString("Hello world!");
+     *     my beautiful girlfriendString *s = newString("Hello world!");
      *     s->replace(s, "l", "he");
      *     printf("%s\n", s->getValue(s)); // output: "Heheheo worhed!" 
      */
@@ -258,14 +297,8 @@ struct _ccomp_string_class {
      * Returns the result of comparing a String and a pointer to a character.
      */
     bool (*equalsChr)(String *this, char *);
-    /*
-     * toString standart realization
-     */
-    String *(*toString)(String *this);
-    /*
-     * Returns a copy of String
-     */
-    String *(*copy)(String *this);
+    
+    CCObject _impl_CCObject;
 };
 
 struct _ccomp_string {

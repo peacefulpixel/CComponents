@@ -12,8 +12,8 @@ typedef struct _map_private {
 } Private;
 
 static long int __map_indexOfKey(ArrayList *keys, char *key) {
-    for (unsigned long int index = 0; index < keys->class->length(keys); index++) {
-        String *currentKey = (String *) keys->class->get(keys, index);
+    for (unsigned long int index = 0; index < keys->class->_impl_List.length(keys); index++) {
+        String *currentKey = (String *) keys->class->_impl_List.get(keys, index);
         if (currentKey->class->equalsChr(currentKey, key))
             return index;
     } return -1;
@@ -24,9 +24,9 @@ static void __map_remove(ArrayMap *this, char *key) {
 
     unsigned long int index = __map_indexOfKey(private->keys, key);
 
-    delete(((String *) private->keys->class->get(private->keys, index)));
-    private->keys->class->remove(private->keys, index);
-    private->values->class->remove(private->values, index);
+    delete(((String *) private->keys->class->_impl_List.get(private->keys, index)));
+    private->keys->class->_impl_List.remove(private->keys, index);
+    private->values->class->_impl_List.remove(private->values, index);
 
     private->mapSize--;
 }
@@ -37,19 +37,19 @@ static void __map_set(ArrayMap *this, char *key, void *value) {
 
     if (index == -1) {
         String *newKey = CreateString(key);
-        private->keys->class->push(private->keys, newKey);
+        private->keys->class->_impl_List.push(private->keys, newKey);
 
         void *randomMemory = malloc((size_t) P_SIZE);
-        private->values->class->push(private->values, randomMemory);
+        private->values->class->_impl_List.push(private->values, randomMemory);
         free(randomMemory);
 
         private->mapSize++;
 
         // More fast then call __map_indexOfKey() again
-        index = private->keys->class->length(private->keys) - 1;
+        index = private->keys->class->_impl_List.length(private->keys) - 1;
     }
 
-    private->values->class->set(private->values, index, value);
+    private->values->class->_impl_List.set(private->values, index, value);
 }
 
 static void *__map_get(ArrayMap *this, char *key) {
@@ -59,7 +59,7 @@ static void *__map_get(ArrayMap *this, char *key) {
     if (index == -1) //TODO: Catch the element existence by another way. __map_indexOfKey must return unsigned long int
         return NULL;
 
-    return private->values->class->get(private->values, (unsigned long int) index);
+    return private->values->class->_impl_List.get(private->values, (unsigned long int) index);
 }
 
 static unsigned long int __map_length(ArrayMap *this) {
@@ -69,14 +69,14 @@ static unsigned long int __map_length(ArrayMap *this) {
 }
 
 static String *__map_toString(ArrayMap *this) {
-    unsigned long int mapLength = this->class->length(this);
+    unsigned long int mapLength = this->class->_impl_Map.length(this);
     Private *private = (Private *) this->_private;
     ArrayList *keys = private->keys;
 
     String *result = CreateString("ArrayMap: [ ");
     for (unsigned long int index = 0; index < mapLength; index++) {
-        String *k = (String *) keys->class->get(keys, index);
-        uintptr_t v = (uintptr_t) this->class->get(this, k->class->getValue(k));
+        String *k = (String *) keys->class->_impl_List.get(keys, index);
+        uintptr_t v = (uintptr_t) this->class->_impl_Map.get(this, k->class->getValue(k));
 
         result->class->add(result, k->class->getValue(k));
         result->class->add(result, ":");
@@ -103,9 +103,9 @@ static ArrayMap *__map_copy(ArrayMap *this) {
     ArrayList *keys = private->keys;
     ArrayList *vals = private->values;
 
-    for (unsigned long int index = 0; index < this->class->length(this); index++) {
-        nKeys->class->push(nKeys, keys->class->get(keys, index));
-        nVals->class->push(nVals, vals->class->get(vals, index));
+    for (unsigned long int index = 0; index < this->class->_impl_Map.length(this); index++) {
+        nKeys->class->_impl_List.push(nKeys, keys->class->_impl_List.get(keys, index));
+        nVals->class->_impl_List.push(nVals, vals->class->_impl_List.get(vals, index));
     }
 
     return newArrayMap;
@@ -136,12 +136,18 @@ static void __map_delete(void *this) {
 }
 
 extern ClassArrayMapType ClassArrayMap = {
-    .remove      = &__map_remove,
-    .set         = &__map_set,
-    .get         = &__map_get,
-    .length      = &__map_length,
-    .toString    = &__map_toString,
-    .copy        = &__map_copy
+    {
+        INTERFACE_MAP,
+        &__map_remove,
+        &__map_set,
+        &__map_get,
+        &__map_length,
+        {
+            INTERFACE_CCOBJECT,
+            &__map_toString,
+            &__map_copy
+        }
+    }
 };
 
 extern Class classArrayMap = {
