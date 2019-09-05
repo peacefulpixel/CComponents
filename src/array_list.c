@@ -5,13 +5,14 @@
 #include "ccomponents.h"
 
 #define P_SIZE sizeof(intptr_t)
+#define this ((ArrayList *) _this)
 
 typedef struct _list_private {
     void **listValue;
     unsigned long int listSize;
 } Private;
 
-static void __list_push(ArrayList *this, void *value) {
+static void __list_push(void *_this, void *value) {
     Private *private = (Private *) this->_private;
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
     
@@ -29,7 +30,7 @@ static void __list_push(ArrayList *this, void *value) {
     free(oldPrivate);
 }
 
-static void __list_remove(ArrayList *this, unsigned long int index) {
+static void __list_remove(void *_this, unsigned long int index) {
     Private *private = (Private *) this->_private;
 
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
@@ -49,23 +50,23 @@ static void __list_remove(ArrayList *this, unsigned long int index) {
     free(oldPrivate);
 }
 
-static void __list_set(ArrayList *this, unsigned long int index, void *value) {
+static void __list_set(void *_this, unsigned long int index, void *value) {
     Private *private = (Private *) this->_private;
 
     memcpy(&private->listValue[index], &value, (size_t) P_SIZE);
 }
 
-static void *__list_get(ArrayList *this, unsigned long int index) {
+static void *__list_get(void *_this, unsigned long int index) {
     Private *private = (Private *) this->_private;
 
     return private->listValue[index];
 }
 
-static unsigned long int __list_length(ArrayList *this) {
+static unsigned long int __list_length(void *_this) {
     return ((Private *) this->_private)->listSize;
 }
 
-static String *__list_toString(ArrayList *this) {
+static String *__list_toString(void *_this) {
     unsigned long int listLength = __list_length(this);
     String *result = CreateString("ArrayList: [ ");
 
@@ -82,13 +83,13 @@ static String *__list_toString(ArrayList *this) {
     return result;
 }
 
-static void __list_include(ArrayList *this, void **array, unsigned long int count) {
+static void __list_include(void *_this, void **array, unsigned long int count) {
     for (int index = 0; index < count; index++) {
         this->class->_impl_List.push(this, *(array + index));
     }
 }
 
-static ArrayList *__list_copy(ArrayList *this) {
+static void *__list_copy(void *_this) {
     Private *private = (Private *) this->_private;
 
     ArrayList *newArrayList = CreateArrayList();
@@ -108,8 +109,8 @@ extern ArrayList *createArrayList() {
     return newArrayList;
 }
 
-static void __list_delete(void *this) {
-    Private *private = (Private *) ((ArrayList *) this)->_private;
+static void __list_delete(void *_this) {
+    Private *private = (Private *) this->_private;
 
     free(private->listValue);
     free(private);

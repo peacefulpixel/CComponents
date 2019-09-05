@@ -4,6 +4,7 @@
 #include "ccomponents.h"
 
 #define P_SIZE sizeof(intptr_t)
+#define this ((ArrayMap *) _this)
 
 typedef struct _map_private {
     ArrayList *values;
@@ -11,7 +12,7 @@ typedef struct _map_private {
     unsigned long int mapSize;
 } Private;
 
-static long int __map_indexOfKey(ArrayList *keys, char *key) {
+long int __map_indexOfKey(ArrayList *keys, char *key) {
     for (unsigned long int index = 0; index < keys->class->_impl_List.length(keys); index++) {
         String *currentKey = (String *) keys->class->_impl_List.get(keys, index);
         if (currentKey->class->equalsChr(currentKey, key))
@@ -19,7 +20,7 @@ static long int __map_indexOfKey(ArrayList *keys, char *key) {
     } return -1;
 }
 
-static void __map_remove(ArrayMap *this, char *key) {
+static void __map_remove(void *_this, char *key) {
     Private *private = (Private *) this->_private;
 
     unsigned long int index = __map_indexOfKey(private->keys, key);
@@ -31,7 +32,7 @@ static void __map_remove(ArrayMap *this, char *key) {
     private->mapSize--;
 }
 
-static void __map_set(ArrayMap *this, char *key, void *value) {
+static void __map_set(void *_this, char *key, void *value) {
     Private *private = (Private *) this->_private;
     unsigned long int index = __map_indexOfKey(private->keys, key);
 
@@ -52,7 +53,7 @@ static void __map_set(ArrayMap *this, char *key, void *value) {
     private->values->class->_impl_List.set(private->values, index, value);
 }
 
-static void *__map_get(ArrayMap *this, char *key) {
+static void *__map_get(void *_this, char *key) {
     Private *private = (Private *) this->_private;
     long int index = __map_indexOfKey(private->keys, key);
 
@@ -62,13 +63,13 @@ static void *__map_get(ArrayMap *this, char *key) {
     return private->values->class->_impl_List.get(private->values, (unsigned long int) index);
 }
 
-static unsigned long int __map_length(ArrayMap *this) {
+static unsigned long int __map_length(void *_this) {
     Private *private = (Private *) this->_private;
 
     return private->mapSize;
 }
 
-static String *__map_toString(ArrayMap *this) {
+static String *__map_toString(void *_this) {
     unsigned long int mapLength = this->class->_impl_Map.length(this);
     Private *private = (Private *) this->_private;
     ArrayList *keys = private->keys;
@@ -93,7 +94,7 @@ static String *__map_toString(ArrayMap *this) {
     return result;
 }
 
-static ArrayMap *__map_copy(ArrayMap *this) {
+static void *__map_copy(void *_this) {
     ArrayMap *newArrayMap = createArrayMap();
     Private *nmPrivate = (Private *) newArrayMap->_private;
     ArrayList *nKeys = nmPrivate->keys;
@@ -126,8 +127,8 @@ extern ArrayMap *createArrayMap() {
     return newArrayMap;
 }
 
-static void __map_delete(void *this) {
-    Private *private = (Private *) ((ArrayMap *) this)->_private;
+static void __map_delete(void *_this) {
+    Private *private = (Private *) this->_private;
 
     delete(private->keys);
     delete(private->values);

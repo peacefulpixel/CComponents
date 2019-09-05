@@ -59,11 +59,11 @@ struct _ccomp_object {
     /**
      * Will return serialized Object as String
      */
-    String *(*toString)(List *this);
+    String *(*toString)(void *this);
     /*
      * Returns a copy of current Object
      */
-    List *(*copy)(List *this);
+    void *(*copy)(void *this);
 };
 
 /**
@@ -77,23 +77,23 @@ struct _ccomp_list {
     /*
      * Adds an item to the list.
      */
-    void (*push)(List *this, void *value);
+    void (*push)(void *this, void *value);
     /*
      * Removes an item from the list with offset
      */
-    void (*remove)(List *this, unsigned long int index);
+    void (*remove)(void *this, unsigned long int index);
     /*
      * Replaces list item by index
      */
-    void (*set)(List *this, unsigned long int index, void *value);
+    void (*set)(void *this, unsigned long int index, void *value);
     /*
      * Returns a list item by index
      */
-    void *(*get)(List *this, unsigned long int index);
+    void *(*get)(void *this, unsigned long int index);
     /*
      * Returns the length of the array
      */
-    unsigned long int (*length)(List *this);
+    unsigned long int (*length)(void *this);
 
     CCObject _impl_CCObject;
 };
@@ -109,19 +109,19 @@ struct _ccomp_map {
     /*
      * Removes an item from the map
      */
-    void (*remove)(ArrayMap *this, char *key);
+    void (*remove)(void *this, char *key);
     /*
      * Replaces map item
      */
-    void (*set)(ArrayMap *this, char *key, void *value);
+    void (*set)(void *this, char *key, void *value);
     /*
      * Returns a map item
      */
-    void *(*get)(ArrayMap *this, char *_value);
+    void *(*get)(void *this, char *_value);
     /*
      * Returns the length of the map
      */
-    unsigned long int (*length)(ArrayMap *this);
+    unsigned long int (*length)(void *this);
 
     CCObject _impl_CCObject;
 };
@@ -139,7 +139,7 @@ struct _ccomp_array_list_class {
     /*
      * Adds elements of array to list
      */
-    void (*include)(ArrayList *this, void **, unsigned long int);
+    void (*include)(void *this, void **, unsigned long int);
 
     List _impl_List;
 };
@@ -205,11 +205,11 @@ struct _ccomp_string_class {
     /*
      * Returns the String value.
      */
-    char *(*getValue)(String *this);
+    char *(*getValue)(void *this);
     /*
      * Sets the value to String
      */
-    void (*setValue)(String *this, char *);
+    void (*setValue)(void *this, char *);
     /*
      * Concatenates the value of the current String and the second argument of the method.
      * The result is written to the current String
@@ -218,7 +218,7 @@ struct _ccomp_string_class {
      *     s->add(s, "world!");
      *     printf("%s\n", s->getValue(s)); // output: "Hello worlrd!"
      */
-    void (*add)(String *this, char *);
+    void (*add)(void *this, char *);
     /*
      * Returns a substring of the current String between two indices, inclusive
      *   Example:
@@ -227,7 +227,7 @@ struct _ccomp_string_class {
      *     String *right = s->sub(s, 3, 3);
      *     printf("%s%s\n", left->getValue(left), right->getValue(right)); // output: "lol"
      */
-    String *(*sub)(String *this, int, int);
+    String *(*sub)(void *this, int, int);
     /* 
      * Replaces in the value of the current String all matches on the regex-pattern with the value
      * passed by the last argument
@@ -236,7 +236,7 @@ struct _ccomp_string_class {
      *     s->replace(s, "l", "he");
      *     printf("%s\n", s->getValue(s)); // output: "Heheheo worhed!" 
      */
-    void (*replace)(String *this, char *, char *);
+    void (*replace)(void *this, char *, char *);
     /* 
      * Replaces the value of the current String with the first match of the regex pattern with the value
      * passed by the last argument
@@ -245,7 +245,7 @@ struct _ccomp_string_class {
      *     s->replaceFirst(s, "l", "he");
      *     printf("%s\n", s->getValue(s)); // output: "Hehelo world!" 
      */
-    void (*replaceFirst)(String *this, char *, char *);
+    void (*replaceFirst)(void *this, char *, char *);
     /*
      * Returns an array of n StringMatch elements.
      * The second argument is the char * that contains the regular expression.
@@ -263,40 +263,40 @@ struct _ccomp_string_class {
      *     deleteString(regex);
      *     deleteString(s);
      */
-    StringMatch *(*match)(String *this, char *, int);
+    StringMatch *(*match)(void *this, char *, int);
     /*
      * Returns an sys/list of String *
      */
-    ArrayList *(*split)(String *this, char *);
+    ArrayList *(*split)(void *this, char *);
     /*
      * Adds a long integer to a string.
      */
-    void (*addLong)(String *this, long int);
+    void (*addLong)(void *this, long int);
     /*
      * Adds a unsigned long integer to a string.
      */
-    void (*addULong)(String *this, unsigned long int);
+    void (*addULong)(void *this, unsigned long int);
     /*
      * Attempts to convert a string to a number.
      * On unsuccessful attempt returns 0
      */
-    int (*toInt)(String *this);
+    int (*toInt)(void *this);
     /*
      * Returns a character from a string by index
      */
-    char (*charAt)(String *this, int);
+    char (*charAt)(void *this, int);
     /*
      * Returns the length of a string.
      */
-    int (*length)(String *this);
+    int (*length)(void *this);
     /*
      * Returns the result of comparing two Strings.
      */
-    bool (*equals)(String *this, String *);
+    bool (*equals)(void *this, String *);
     /*
      * Returns the result of comparing a String and a pointer to a character.
      */
-    bool (*equalsChr)(String *this, char *);
+    bool (*equalsChr)(void *this, char *);
     
     CCObject _impl_CCObject;
 };

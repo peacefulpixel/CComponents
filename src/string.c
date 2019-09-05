@@ -8,17 +8,18 @@
 #include "ccomponents.h"
 
 #define P_SIZE sizeof(intptr_t)
+#define this ((String *) _this)
 
 typedef struct _string_private {
     char *stringValue;
 } Private;
 
-static char *__string_get(String *this) {
+static char *__string_get(void *_this) {
     Private *private = (Private *) this->_private;
     return private->stringValue;
 }
 
-static void __string_set(String *this, char *value) {
+static void __string_set(void *_this, char *value) {
     int memSize = (int) (sizeof(char) * strlen(value));
 
     free(((Private *) this->_private)->stringValue);
@@ -30,7 +31,7 @@ static void __string_set(String *this, char *value) {
     memcpy(stringValue->stringValue + memSize, "\0", 1);
 }
 
-static void __string_add(String *this, char *value) {
+static void __string_add(void *_this, char *value) {
     int aSize = (int) (sizeof(char) * strlen(this->class->getValue(this)));
     int bSize = (int) (sizeof(char) * strlen(value));
 
@@ -47,7 +48,7 @@ static void __string_add(String *this, char *value) {
     free(aDump);
 }
 
-static String *__string_sub(String *this, int begin, int end) {
+static String *__string_sub(void *_this, int begin, int end) {
     int size = (int) sizeof(char) * (end - begin);
 
     char *newValue = (char *) malloc((size_t) size + 1);
@@ -60,7 +61,7 @@ static String *__string_sub(String *this, int begin, int end) {
     return newString;
 }
 
-static void __string_replace(String *this, char *regex, char *value) {
+static void __string_replace(void *_this, char *regex, char *value) {
     String *current = createStringChar(this->class->getValue(this));
     StringMatch *match = current->class->match(current, regex, 1);
 
@@ -93,7 +94,7 @@ static void __string_replace(String *this, char *regex, char *value) {
     delete(builder);
 }
 
-static void __string_replaceFirst(String *this, char *regex, char *value) {
+static void __string_replaceFirst(void *_this, char *regex, char *value) {
     StringMatch *match = this->class->match(this, regex, 1);
 
     if (match->begin == -1 || match->begin == -2)
@@ -114,7 +115,7 @@ static void __string_replaceFirst(String *this, char *regex, char *value) {
     free(newValue);
 }
 
-static StringMatch *__string_match(String *this, char *regex, int maxMatchesCount) {
+static StringMatch *__string_match(void *_this, char *regex, int maxMatchesCount) {
     regex_t regexObject;
 
     StringMatch *matchesResult = (StringMatch *) malloc((size_t) maxMatchesCount * sizeof(matchesResult));
@@ -151,7 +152,7 @@ static StringMatch *__string_match(String *this, char *regex, int maxMatchesCoun
     return matchesResult;
 }
 
-static ArrayList *__string_split(String *this, char *regex) {
+static ArrayList *__string_split(void *_this, char *regex) {
     StringMatch *match = this->class->match(this, regex, 1);
     ArrayList *result = CreateArrayList((int) sizeof(String *));
 
@@ -171,21 +172,21 @@ static ArrayList *__string_split(String *this, char *regex) {
     return result;
 }
 
-static void __string_addLong(String *this, long int number) {
+static void __string_addLong(void *_this, long int number) {
     String *numberTemp = createStringLong(number);
     this->class->add(this, numberTemp->class->getValue(numberTemp));
 
     delete(numberTemp);
 }
 
-static void __string_addULong(String *this, unsigned long int number) {
+static void __string_addULong(void *_this, unsigned long int number) {
     String *numberTemp = createStringULong(number);
     this->class->add(this, numberTemp->class->getValue(numberTemp));
 
     delete(numberTemp);
 }
 
-static int __string_toInt(String *this) {
+static int __string_toInt(void *_this) {
     int thisLength = this->class->length(this);
     int zeroCount = thisLength - 1;
 
@@ -215,27 +216,27 @@ static int __string_toInt(String *this) {
     return result;
 }
 
-static char __string_charAt(String *this, int index) {
+static char __string_charAt(void *_this, int index) {
     return this->class->getValue(this)[index];
 }
 
-static int __string_stringLength(String *this) {
+static int __string_stringLength(void *_this) {
     return (int) strlen(this->class->getValue(this));
 }
 
-static bool __string_equals(String *this, String *subject) {
+static bool __string_equals(void *_this, String *subject) {
     return (bool) strcmp(this->class->getValue(this), subject->class->getValue(subject)) == 0;
 }
 
-static bool __string_equalsChr(String *this, char *subject) {
+static bool __string_equalsChr(void *_this, char *subject) {
     return (bool) strcmp(this->class->getValue(this), subject) == 0;
 }
 
-static String *__string_toString(String *this) {
+static String *__string_toString(void *_this) {
     return this->class->_impl_CCObject.copy(this);
 }
 
-static String *__string_copy(String *this) {
+static void *__string_copy(void *_this) {
     String *newString = createStringChar(this->class->getValue(this));
 
     return newString;
@@ -292,8 +293,8 @@ extern String *createStringULong(unsigned long int number) {
     return __createStringLong((long int) number, true);
 }
 
-static void __string_delete(void *this) {
-    Private *stringValue = (Private *) ((String *) this)->_private;
+static void __string_delete(void *_this) {
+    Private *stringValue = (Private *) this->_private;
     
     free(stringValue->stringValue);
     free(stringValue);
