@@ -26,6 +26,8 @@ typedef struct _ccomp_class {
     void (*delete)(void *instance);
 } Class;
 
+typedef void * v_private;
+
 /**
  * Interfaces pre-declaration
  */
@@ -147,7 +149,7 @@ struct _ccomp_array_list_class {
 struct _ccomp_array_list {
     Class *_class;
     ClassArrayListType *class;
-    void *_private;
+    v_private _private;
 };
 
 extern ArrayList *createArrayList();
@@ -173,7 +175,7 @@ struct _ccomp_array_map_class {
 struct _ccomp_array_map {
     Class *_class;
     ClassArrayMapType *class;
-    void *_private;
+    v_private _private;
 };
 
 extern ArrayMap *createArrayMap();
@@ -304,7 +306,7 @@ struct _ccomp_string_class {
 struct _ccomp_string {
     Class *_class;
     ClassStringType *class;
-    void *_private;
+    v_private _private;
 };
 
 extern String *createStringChar(char *);
