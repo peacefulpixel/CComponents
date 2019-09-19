@@ -7,6 +7,8 @@ extern "C" {
 
 #include <stdbool.h>
 
+#include "foreach.h"
+
 #ifdef delete
 #error Macro delete already defined
 #endif /* delete */

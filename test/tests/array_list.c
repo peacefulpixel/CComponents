@@ -62,6 +62,10 @@ int main(int argc, char **argv) {
     for (int index = 0; index < 6; index++)
         assert(ClassArrayList._impl_List.get(copy, index) == ClassArrayList._impl_List.get(list, index));
 
+    List_forEach(copy, item, {
+        // TODO: Do something with item
+    });
+
     delete(copy);
     delete(list);
 
