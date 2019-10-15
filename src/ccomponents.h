@@ -147,10 +147,12 @@ struct _ccomp_string_class {
     void (*setValue)(void *this, char *);
     void (*add)(void *this, char *);
     String *(*sub)(void *this, int, int);
+#ifndef _WIN32
     void (*replace)(void *this, char *, char *);
     void (*replaceFirst)(void *this, char *, char *);
     StringMatch *(*match)(void *this, char *, int);
     ArrayList *(*split)(void *this, char *);
+#endif
     void (*addLong)(void *this, long int);
     void (*addULong)(void *this, unsigned long int);
     int (*toInt)(void *this);

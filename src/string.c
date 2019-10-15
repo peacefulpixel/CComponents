@@ -1,5 +1,9 @@
 #include <math.h>
+
+#ifndef _WIN32
 #include <regex.h>
+#endif
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,6 +64,8 @@ static String *__string_sub(void *_this, int begin, int end) {
 
     return newString;
 }
+
+#ifndef _WIN32
 
 static void __string_replace(void *_this, char *regex, char *value) {
     String *current = createStringChar(this->class->getValue(this));
@@ -171,6 +177,8 @@ static ArrayList *__string_split(void *_this, char *regex) {
     free(match);
     return result;
 }
+
+#endif
 
 static void __string_addLong(void *_this, long int number) {
     String *numberTemp = createStringLong(number);
@@ -306,10 +314,12 @@ extern ClassStringType ClassString = {
     &__string_set,
     &__string_add,
     &__string_sub,
+#ifndef _WIN32
     &__string_replace,
     &__string_replaceFirst,
     &__string_match,
     &__string_split,
+#endif
     &__string_addLong,
     &__string_addULong,
     &__string_toInt,

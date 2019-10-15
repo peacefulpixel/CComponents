@@ -16,6 +16,8 @@ int main(int argc, char **argv) {
 
     delete(int_string);
 
+#ifndef _WIN32
+
     String *long_string = CreateString(-1744674407709551614);
     assert(!(strcmp(ClassString.getValue(long_string), "-1744674407709551614")));
 
@@ -29,6 +31,8 @@ int main(int argc, char **argv) {
     assert(!(strcmp(ClassString.getValue(ulong_string), "1670206966600000000218446744073709551615")));
 
     delete(ulong_string);
+
+#endif
 
     // Testing add() and addLong()
     ClassString.add(string, "world!");
@@ -50,6 +54,8 @@ int main(int argc, char **argv) {
     assert(!ClassString.equals(string, new_str));
 
     delete(new_str);
+
+#ifndef _WIN32
 
     // Testing match()
     String *regex = CreateString("o");
@@ -81,6 +87,8 @@ int main(int argc, char **argv) {
     delete(part_a);
     delete(part_b);
     delete(parts);
+
+#endif
 
     // Testing sub()
     new_str = ClassString.sub(string, 9, 11);
