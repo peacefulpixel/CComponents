@@ -15,8 +15,21 @@ OBJECTS_TST = $(patsubst $(TST_DIR)/%.c, $(TST_DIR)/%.o, $(SOURCES_TST))
 TEST_EXE = test.tcl
 LIB      = libccomponents
 
-MSG_BEG = @if [ ! $$(echo -n $(LOG) | wc -m) -ge 1 ]; then printf "\033[0;35m\033[1m[CComponents]\033[0m 
-MSG_END = "; fi
+OS_WIN = Windows_NT
+
+ifeq ($(OS), $(OS_WIN)) 
+    MSG_BEG = @echo "[CComponents] 
+    MSG_END = "
+else
+    E_PUR = \033[0;35m
+    E_BLU = \033[0;34m
+    E_RED = \033[0;31m
+    E_B   = \033[1m
+    E_0   = \033[0m
+    E_0BLU = $(E_0)$(E_BLU)
+    MSG_BEG = @if [ ! $$(echo -n $(LOG) | wc -m) -ge 1 ]; then printf "$(E_PUR)$(E_B)[CComponents]$(E_0) 
+    MSG_END = "; fi
+endif
 
 # Set to null to disable debug and @ to enable. Works also for TST
 LOG = 
@@ -27,42 +40,42 @@ all: $(BIN_DIR) $(OBJECTS) test $(LIB)
 notest: $(BIN_DIR) $(OBJECTS) $(LIB)
 
 $(BIN_DIR):
-	$(MSG_BEG)\033[0m\033[0;34mCreating \033[1mbin\033[0m\033[0;34m directory:\033[0m\n$(MSG_END)
+	$(MSG_BEG)$(E_BLU)Creating $(E_B)bin$(E_0BLU) directory:$(E_0)\n$(MSG_END)
 	$(LOG)mkdir $(BIN_DIR)
 
 $(BIN_DIR)/%.o : $(SRC_DIR)/%.c
-	$(MSG_BEG)\033[0m\033[0;34mCompiling \033[1m$^\033[0m\033[0;34m source file:\033[0m\n$(MSG_END)
+	$(MSG_BEG)$(E_BLU)Compiling $(E_B)$^$(E_0BLU) source file:$(E_0)\n$(MSG_END)
 	$(LOG)$(CC) $(CFLAGS) $< -o $@
 
 $(TST_DIR)/%.o : $(TST_DIR)/%.c
-	$(MSG_BEG)\033[0m\033[0;34mBuilding test \033[1m$^:\033[0m\n$(MSG_END)
+	$(MSG_BEG)$(E_BLU)Building test $(E_B)$^$(E_0BLU):$(E_0)\n$(MSG_END)
 	$(LOG)$(CC) $(CFLAGST) $< -o $@ $(COMPOBJ)
 
 test: $(TEST_OBJ) $(OBJECTS_TST) $(COMPOBJ)
-	$(MSG_BEG)\033[0m\033[1;31mIF YOU HAVE NOT A TCL INTERPRETER YOU CAN BUILD PROJECT WITH "notest" GOAL\033[0m\n$(MSG_END)
-	$(MSG_BEG)\033[0m\033[1;31mFor example: make notest \033[0m\n$(MSG_END)
+	$(MSG_BEG)$(E_RED)IF YOU HAVE NOT A TCL INTERPRETER YOU CAN BUILD PROJECT WITH "notest" GOAL$(E_0)\n$(MSG_END)
+	$(MSG_BEG)$(E_RED)For example: make notest $(E_0)\n$(MSG_END)
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
-		printf "\033[0m\033[0;34mRunning \033[1mtests:\033[0m\n"; fi
+		printf "$(E_BLU)Running $(E_B)tests$(E_0BLU):$(E_0)\n"; fi
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
 		cd test && ./$(TEST_EXE) -debug ; else \
 		cd test && ./$(TEST_EXE) -nout  ; fi
-	$(MSG_BEG)\033[0m\033[0;34mDeleting \033[1mtests object files:\033[0m\n"; fi
+	$(MSG_BEG)$(E_BLU)Deleting $(E_B)tests object files:$(E_0)\n"; fi
 	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ)
 
 $(LIB): $(OBJECTS)
-	$(MSG_BEG)\033[0m\033[0;34mCreating \033[1mbuild\033[0m\033[0;34m directory:\033[0m\n$(MSG_END)
+	$(MSG_BEG)$(E_BLU)Creating $(E_B)build$(E_0BLU) directory:$(E_0)\n$(MSG_END)
 	$(LOG)mkdir $(BUILD_DIR)
-	$(MSG_BEG)\033[0m\033[0;34mBuilding \033[1mlibrary:\033[0m\n$(MSG_END)
+	$(MSG_BEG)$(E_BLU)Building $(E_B)library$(E_0BLU):$(E_0)\n$(MSG_END)
 	$(LOG)$(CC) -Wall -shared -o $(BUILD_DIR)/$(LIB).so $(OBJECTS)
-	$(MSG_BEG)\033[0m\033[0;34mCopying \033[1mlibrary header:\033[0m\n$(MSG_END)
+	$(MSG_BEG)$(E_BLU)Copying $(E_B)library header$(E_0BLU):$(E_0)\n$(MSG_END)
 	$(LOG)cp $(SRC_DIR)/ccomponents.h $(BUILD_DIR)
 
 clean:
-	@$(MSG_BEG)\033[0m\033[0;34mRecursive removing \033[1mbin\033[0m\033[0;34m directory:\033[0m\n"; fi
+	@$(MSG_BEG)$(E_BLU)Recursive removing $(E_B)bin$(E_0BLU) directory:$(E_0)\n$(MSG_END)
 	$(LOG)rm -rf bin
-	$(MSG_BEG)\033[0m\033[0;34mRemoving \033[1mtests\033[0m\033[0;34m symlink:\033[0m\n"; fi
+	$(MSG_BEG)$(E_BLU)Removing $(E_B)tests$(E_0BLU) symlink:$(E_0)\n$(MSG_END)
 	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ)
-	$(MSG_BEG)\033[0m\033[0;34mRecursive removing \033[1mbuild\033[0m\033[0;34m directory:\033[0m\n"; fi
+	$(MSG_BEG)$(E_BLU)Recursive removing $(E_B)build$(E_0BLU) directory:$(E_0)\n$(MSG_END)
 	$(LOG)rm -rf build
 
 rebuild: clean all
