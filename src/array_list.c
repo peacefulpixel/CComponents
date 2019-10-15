@@ -117,7 +117,7 @@ static void __list_delete(void *_this) {
     free(this);
 }
 
-extern ClassArrayListType ClassArrayList = {
+ClassArrayListType ClassArrayList = {
     &__list_include,
     {
         INTERFACE_LIST,
@@ -134,7 +134,7 @@ extern ClassArrayListType ClassArrayList = {
     }
 };
 
-extern Class classArrayList = {
+Class classArrayList = {
     .classType = CLASS_ARRAY_LIST,
     .delete    = &__list_delete
 };

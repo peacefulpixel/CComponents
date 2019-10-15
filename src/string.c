@@ -309,7 +309,7 @@ static void __string_delete(void *_this) {
     free(this);
 }
 
-extern ClassStringType ClassString = {
+ClassStringType ClassString = {
     &__string_get,
     &__string_set,
     &__string_add,
@@ -334,7 +334,7 @@ extern ClassStringType ClassString = {
     }
 };
 
-extern Class classString = {
+Class classString = {
     .classType = CLASS_STRING,
     .delete    = &__string_delete
 };

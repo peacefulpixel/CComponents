@@ -136,7 +136,7 @@ static void __map_delete(void *_this) {
     free(this);
 }
 
-extern ClassArrayMapType ClassArrayMap = {
+ClassArrayMapType ClassArrayMap = {
     {
         INTERFACE_MAP,
         &__map_remove,
@@ -151,7 +151,7 @@ extern ClassArrayMapType ClassArrayMap = {
     }
 };
 
-extern Class classArrayMap = {
+Class classArrayMap = {
     .classType = CLASS_ARRAY_MAP,
     .delete    = &__map_delete
 };
