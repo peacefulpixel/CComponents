@@ -12,26 +12,27 @@ SOURCES = $(COMPSRC)
 OBJECTS = $(COMPOBJ)
 SOURCES_TST = $(TST_DIR)/tests/array_list.c $(TST_DIR)/tests/array_map.c $(TST_DIR)/tests/string.c 
 OBJECTS_TST = $(patsubst $(TST_DIR)/%.c, $(TST_DIR)/%.o, $(SOURCES_TST))
-TEST_EXE = test.tcl
+TEST_EXE = ./test.tcl
 LIB      = libccomponents
 
 OS_WIN = Windows_NT
 
 ifeq ($(OS), $(OS_WIN)) 
-    MSG_BEG = @echo "[CComponents] 
-    MSG_END = "
+        MSG_BEG = @echo "[CComponents] 
+        MSG_END = "
+	TEST_EXE = tclsh test.tcl
 else
-    E_PUR = \033[0;35m
-    E_BLU = \033[0;34m
-    E_RED = \033[0;31m
-    E_B   = \033[1m
-    E_0   = \033[0m
-    E_0BLU = $(E_0)$(E_BLU)
-    MSG_BEG = @if [ ! $$(echo -n $(LOG) | wc -m) -ge 1 ]; then printf "$(E_PUR)$(E_B)[CComponents]$(E_0) 
-    MSG_END = "; fi
+        E_PUR = \033[0;35m
+        E_BLU = \033[0;34m
+        E_RED = \033[0;31m
+        E_B   = \033[1m
+        E_0   = \033[0m
+        E_0BLU = $(E_0)$(E_BLU)
+        MSG_BEG = @if [ ! $$(echo -n $(LOG) | wc -m) -ge 1 ]; then printf "$(E_PUR)$(E_B)[CComponents]$(E_0) 
+        MSG_END = "; fi
 endif
 
-# Set to null to disable debug and @ to enable. Works also for TST
+# Set to empty to disable debug and @ to enable. Works also for TST
 LOG = 
 TST = 
 
@@ -57,10 +58,10 @@ test: $(TEST_OBJ) $(OBJECTS_TST) $(COMPOBJ)
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
 		printf "$(E_BLU)Running $(E_B)tests$(E_0BLU):$(E_0)\n"; fi
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
-		cd test && ./$(TEST_EXE) -debug ; else \
-		cd test && ./$(TEST_EXE) -nout  ; fi
+		cd test && $(TEST_EXE) -debug ; else \
+		cd test && $(TEST_EXE) -nout  ; fi
 	$(MSG_BEG)$(E_BLU)Deleting $(E_B)tests object files:$(E_0)\n"; fi
-	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ)
+	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ) 
 
 $(LIB): $(OBJECTS)
 	$(MSG_BEG)$(E_BLU)Creating $(E_B)build$(E_0BLU) directory:$(E_0)\n$(MSG_END)
