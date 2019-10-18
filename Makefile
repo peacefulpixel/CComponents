@@ -60,7 +60,7 @@ test: $(TEST_OBJ) $(OBJECTS_TST) $(COMPOBJ)
 	@if [ ! $$(echo -n $(TST) | wc -m) -ge 1 ]; then \
 		cd test && $(TEST_EXE) -debug ; else \
 		cd test && $(TEST_EXE) -nout  ; fi
-	$(MSG_BEG)$(E_BLU)Deleting $(E_B)tests object files:$(E_0)\n"; fi
+	$(MSG_BEG)$(E_BLU)Deleting $(E_B)tests object files:$(E_0)\n$(MSG_END)
 	$(LOG)rm -f $(OBJECTS_TST) $(TEST_OBJ) 
 
 $(LIB): $(OBJECTS)
@@ -70,6 +70,7 @@ $(LIB): $(OBJECTS)
 	$(LOG)$(CC) -Wall -shared -o $(BUILD_DIR)/$(LIB).so $(OBJECTS)
 	$(MSG_BEG)$(E_BLU)Copying $(E_B)library header$(E_0BLU):$(E_0)\n$(MSG_END)
 	$(LOG)cp $(SRC_DIR)/ccomponents.h $(BUILD_DIR)
+	$(LOG)cp $(SRC_DIR)/foreach.h $(BUILD_DIR)
 
 clean:
 	@$(MSG_BEG)$(E_BLU)Recursive removing $(E_B)bin$(E_0BLU) directory:$(E_0)\n$(MSG_END)
