@@ -12,7 +12,7 @@ typedef struct _map_private {
     unsigned long int mapSize;
 } Private;
 
-long int __map_indexOfKey(ArrayList *keys, char *key) {
+static long int __map_indexOfKey(ArrayList *keys, char *key) {    
     for (unsigned long int index = 0; index < keys->class->_impl_List.length(keys); index++) {
         String *currentKey = (String *) keys->class->_impl_List.get(keys, index);
         if (currentKey->class->equalsChr(currentKey, key))
