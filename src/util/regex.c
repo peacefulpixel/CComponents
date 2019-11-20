@@ -132,6 +132,12 @@ static bool isInSequence(char *sequence, char symbol) {
     return false;
 }
 
+enum PatternCount {
+    ANY = -1,
+    ONE_OR_MORE = -2,
+    ONE_OR_NOT = -3
+};
+
 typedef struct _pattern {
     char *value;
     bool valueAny;
@@ -161,8 +167,101 @@ static void freePattern(Pattern *pattern) {
 
 }
 
-static bool processPattern(Pattern *pattern, char *input) {
+/**
+ * Processes the pattern and store matches.
+ * Returns false if the input does not match a pattern
+ **/
+static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
+    
+    Pattern *cursor = pattern;
+    int inputIndex = 0;
+    int patternCountPassed = 0;
 
+    while (cursor != NULL) {
+
+        const char current = *(input + inputIndex);
+
+        if (current == '\0' && cursor->count < 1) {
+            return false;
+        }
+
+        bool isMatch = cursor->valueAny || 
+            isInSequence(cursor->value, current);
+
+        if (cursor->count == ANY) {
+
+            if (!isMatch) {
+                cursor = cursor->next;
+            } else {
+                inputIndex++;
+            }
+
+        } else if (cursor->count == ONE_OR_MORE) {
+
+            if (!isMatch && !patternCountPassed) {
+                return false;
+            }
+
+            if (!isMatch) {
+                cursor = cursor->next;
+                patternCountPassed = 0;
+            } else {
+                patternCountPassed++;
+                inputIndex++;
+            }
+            
+        } else if (cursor->count == ONE_OR_NOT) {
+
+            if (isMatch) {
+                inputIndex++;
+            }
+
+            cursor = cursor->next;
+
+        } else if (cursor->count - patternCountPassed) {
+
+            if (!isMatch) {
+                return false;
+            }
+
+            patternCountPassed++;
+            inputIndex++;
+
+        } else {
+
+            patternCountPassed = 0;
+            cursor = cursor->next;
+
+        }
+    }
+
+    match->from = 0;
+    match->to   = inputIndex;
+    match->next = NULL;
+
+    while (*(input + inputIndex) != '\0') {
+        
+        match->next = ALOC(sizeof(_RegMatch));
+        if (processPattern(pattern, match->next, input + inputIndex)) {
+
+            _RegMatch *cursor = match->next;
+            while (cursor != NULL) {
+                cursor->from += inputIndex;
+                cursor->to   += inputIndex;
+                cursor = cursor->next;
+            }
+
+            break;
+        } else {
+            FREE(match->next); // TODO: Minimize a memory allocations count in this cycle if it possible
+            match->next = NULL;
+        }
+
+        inputIndex++;
+
+    }
+
+    return true;
 }
 
 /**
@@ -376,7 +475,7 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
     }
 
     /* Parsing next expression if needed */
-    if (*(pattern + len) != '\0') {
+    if (*(pattern + nextIndex + len) != '\0') {
         dest->next = createPattern();
         
         return buildPattern(pattern + nextIndex, dest->next);
@@ -399,9 +498,15 @@ bool _regex_match(_RegError **error, _RegMatch **match, char *pattern, char *str
         return false;
     }
 
+    *match = ALOC(sizeof(_RegMatch));
+
+    char *strCopy = toHeap(str);
+    bool result = processPattern(_pattern, *match, strCopy);
+    FREE(strCopy);
+
     freePattern(_pattern);
 
     PRINT_ALLOCATED_COUNT
 
-    return true;
+    return result;
 }
