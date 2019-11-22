@@ -6,11 +6,13 @@ SRC_DIR = src
 BIN_DIR = bin
 TST_DIR = test
 BUILD_DIR = build
-COMPSRC = $(SRC_DIR)/array_list.c $(SRC_DIR)/array_map.c $(SRC_DIR)/string.c
+COMPSRC_UTIL = $(SRC_DIR)/util/regex.c
+COMPSRC_ROOT = $(SRC_DIR)/array_list.c $(SRC_DIR)/array_map.c $(SRC_DIR)/string.c
+COMPSRC = $(COMPSRC_UTIL) $(COMPSRC_ROOT)
 COMPOBJ = $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(COMPSRC))
-SOURCES = $(COMPSRC)
-OBJECTS = $(COMPOBJ)
-SOURCES_TST = $(TST_DIR)/tests/array_list.c $(TST_DIR)/tests/array_map.c $(TST_DIR)/tests/string.c 
+SOURCES = $(COMPSRC) # TODO: Replace all COMPSRC usages with SOURCES and remove it
+OBJECTS = $(COMPOBJ) # TODO: The same actions
+SOURCES_TST = $(TST_DIR)/tests/array_list.c $(TST_DIR)/tests/array_map.c $(TST_DIR)/tests/string.c $(TST_DIR)/tests/util/regex.c 
 OBJECTS_TST = $(patsubst $(TST_DIR)/%.c, $(TST_DIR)/%.o, $(SOURCES_TST))
 TEST_EXE = ./test.tcl
 LIB      = libccomponents
@@ -43,6 +45,7 @@ notest: $(BIN_DIR) $(OBJECTS) $(LIB)
 $(BIN_DIR):
 	$(MSG_BEG)$(E_BLU)Creating $(E_B)bin$(E_0BLU) directory:$(E_0)\n$(MSG_END)
 	$(LOG)mkdir $(BIN_DIR)
+	$(LOG)mkdir $(BIN_DIR)/util
 
 $(BIN_DIR)/%.o : $(SRC_DIR)/%.c
 	$(MSG_BEG)$(E_BLU)Compiling $(E_B)$^$(E_0BLU) source file:$(E_0)\n$(MSG_END)

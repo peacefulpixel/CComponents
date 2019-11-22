@@ -6,7 +6,7 @@
 
 /* Debug area */
 
-#define __REGEX_DEBUG__
+// #define __REGEX_DEBUG__
 
 #ifdef ALOC
 #error ALOC already defined
@@ -475,7 +475,7 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
     }
 
     /* Parsing next expression if needed */
-    if (*(pattern + nextIndex + len) != '\0') {
+    if (*(pattern + nextIndex) != '\0') {
         dest->next = createPattern();
         
         return buildPattern(pattern + nextIndex, dest->next);
@@ -489,12 +489,10 @@ bool _regex_match(_RegError **error, _RegMatch **match, char *pattern, char *str
     Pattern *_pattern = createPattern();
 
     char *patternCopy = toHeap(pattern);
-    _RegError *err = buildPattern(patternCopy, _pattern);
+    *error = buildPattern(patternCopy, _pattern);
     FREE(patternCopy);
 
-    if (err != NULL) {
-
-        *error = err;
+    if (*error != NULL) {
         return false;
     }
 
@@ -503,6 +501,11 @@ bool _regex_match(_RegError **error, _RegMatch **match, char *pattern, char *str
     char *strCopy = toHeap(str);
     bool result = processPattern(_pattern, *match, strCopy);
     FREE(strCopy);
+
+    if (!result) {
+        FREE(*match);
+        *match = NULL;
+    }
 
     freePattern(_pattern);
 
