@@ -31,7 +31,6 @@ printf("[RX_DEBUG] __regex_allocated_count=%d\n", __regex_allocated_count);
 #define ALOC(__SIZE__) malloc(__SIZE__);
 #define FREE(__POINTER__) free(__POINTER__);
 #define PRINT_ALLOCATED_COUNT
-#define RX_DEBUG(STR, __VA_ARGS__)
 #endif
 
 /* End of debug area */
@@ -41,7 +40,7 @@ printf("[RX_DEBUG] __regex_allocated_count=%d\n", __regex_allocated_count);
 #endif
 
 #define STR_LENGTH(__VAR_NAME__, __STR__) \
-        int __VAR_NAME__ = 0; \
+        unsigned int __VAR_NAME__ = 0; \
         for (; \
             *(__STR__ + __VAR_NAME__) != '\0'; \
             __VAR_NAME__++ \
@@ -79,7 +78,7 @@ void _regex_free_match(_RegMatch *match) {
  * Concatenates two strings.
  * Parameter "count" is a char count to copy from b
  **/
-static char *strAppendSome(char *a, char *b, int count) {
+static char *strAppendSome(char *a, char *b, unsigned int count) {
     STR_LENGTH(aLen, a);
 
     char *newStr = ALOC(CH_SIZE * (aLen + count + 1));
@@ -328,17 +327,17 @@ static _RegError *processSequence(char **buffer, char *sequence) {
                 THROW_REG_ERR(c, "Invalid symbol range");
             }
 
-            char diff = to - current + 1;
+            char diff = (char) (to - current + 1);
             if (diff < 1) {
                 THROW_REG_ERR(c, "Invalid symbol range");
             }
 
-            char *seq = ALOC(CH_SIZE * diff + 1);
-            for (int c1 = 0; c1 < diff; c1++) {
-                seq[c1] = current + c1;
+            char *seq = ALOC(CH_SIZE * (unsigned int) diff + 1);
+            for (char c1 = 0; c1 < diff; c1++) {
+                *(seq + c1) = (char) (current + c1);
             }
 
-            seq[diff] = '\0';
+            *(seq + diff) = '\0';
 
             char *appended = strAppend(*buffer, seq);
             FREE(*buffer);
