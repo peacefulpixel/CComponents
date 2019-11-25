@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
         assert(ClassArrayList._impl_List.get(copy, index) == ClassArrayList._impl_List.get(list, index));
 
     List_forEach(copy, item, {
-        // TODO: Do something with item
+        assert(item != NULL);
     });
 
     delete(copy);
