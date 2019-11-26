@@ -3,30 +3,31 @@
 
 #include "../../../src/util/regex.h"
 
+#define FREE _regex_free_error(error); _regex_free_match(match); match = NULL;
+
+#define ASSERT_OK assert(result); assert(match != NULL); \
+                  assert(error == NULL); FREE
+
+#define ASSERT_NOT_OK assert(!result); assert(match == NULL); \
+                      assert(error == NULL); FREE
+
 int main(int argc, char **argv) {
 
     _RegError *error;
     _RegMatch *match;
+    bool result;
 
-    // TODO: Replace hardcoded expressions and values to generated
-    char *expr = "dr[o-zA-V\\d]+r*i";
-    bool result = _regex_match(&error, &match, expr, "drEpr2i");
+    result = _regex_match(&error, &match, "dr[o-zA-V\\d]+r*i", "drEpr2i");
+    ASSERT_OK
 
-    assert(result);
-    assert(match != NULL);
-    assert(error == NULL);
+    result = _regex_match(&error, &match, "dr[o-zA-V\\d]+r*i", "drEpXr2i");
+    ASSERT_NOT_OK
 
-    _regex_free_error(error);
-    _regex_free_match(match);
+    result = _regex_match(&error, &match, "[\\]]+\\[]\\.+", "]][].....");
+    ASSERT_OK
 
-    result = _regex_match(&error, &match, expr, "drEpXr2i");
-
-    assert(!result);
-    assert(match == NULL);
-    assert(error == NULL);
-
-    _regex_free_error(error);
-    _regex_free_match(match);
+    result = _regex_match(&error, &match, "[\\]]+\\[]\\.+", "]][]1");
+    ASSERT_NOT_OK
 
     return 0;
 }

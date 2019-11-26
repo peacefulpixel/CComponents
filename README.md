@@ -2,23 +2,29 @@
 The set of high-level instruments for C
 
 ## Built-in regex specification
-CComponents includes regular expressions implmentation for some reasons:
-- Windows MinGW doesn't contains <regex.h> header unlike UNIX-systems
-- Including PCRE2 or other regex realizations will cause a lack of independence and may affect on library building and usage difficulty
+The CComponents library includes a lightweight regular expressions realization for simple cases you need it. A regex required by some methods like `StringClassType.match` and `StringClassType.replace` e.g.
+If it don't satisfies yours requirements, you just can to replace `src/util/regex.c` file content to waht you want. Custom regex realization was written because of some reasons, a few of that described below:
+- Windows MinGW doesn't contains `<regex.h>` header unlike UNIX-systems
+- Including PCRE2 or other regex realizations will affect on library independence
 - Using C++ regex makes to change a project compiler and incompatibility with only-C-oriented compilers
 
-**A Specification can be changed by any time in the version context**, but we trying to reach the POSIX standard. Nonetheless, a current state of this doesn't match the POSIX.
+Here a list that describes some things that this custom regex supports:
 
-For now, the regex doesn't support subexpressions and other extended stuff. Probably it means a current realization is something like "Regex-lite version". The list of supported things:
-
-| Feature |   Status   |
-|:-------:| ---------- |
-|  [...]  | Half-works |
-| [^...]  |  In plans  |
-|    *    |   Works    |
-|    +    |   Works    |
-|    ?    |   Works    |
-|   \s    |   Works    |
-|   \w    |   Works    |
-|   \d    |   Works    |
-|    .    |   Works    |
+**TODO: Replace this table columns to | Pattern | Description |**
+|  Feature  |   Status   |
+|:---------:| ---------- |
+| `$ and ^` |  In plans  |
+|  `[...]`  | Half-works |
+|    `*`    |   Works    |
+|    `+`    |   Works    |
+|    `?`    |   Works    |
+|   `\s`    |   Works    |
+|   `\w`    |   Works    |
+|   `\d`    |   Works    |
+|   `\S`    |  In plans  |
+|   `\W`    |  In plans  |
+|   `\D`    |  In plans  |
+|    `.`    |   Works    |
+|   `()`    |  In plans  |
+|  `(\|)`   |  In plans  |
+|  `{0,3}`  |  In plans  |

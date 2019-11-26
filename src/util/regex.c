@@ -78,7 +78,7 @@ void _regex_free_match(_RegMatch *match) {
  * Concatenates two strings.
  * Parameter "count" is a char count to copy from b
  **/
-static char *strAppendSome(char *a, char *b, unsigned int count) {
+static inline char *strAppendSome(char *a, char *b, unsigned int count) {
     STR_LENGTH(aLen, a);
 
     char *newStr = ALOC(CH_SIZE * (aLen + count + 1));
@@ -92,7 +92,7 @@ static char *strAppendSome(char *a, char *b, unsigned int count) {
 /**
  * Concatenates two strings
  **/
-static char *strAppend(char *a, char *b) {
+static inline char *strAppend(char *a, char *b) {
     STR_LENGTH(bLen, b);
 
     return(strAppendSome(a, b, bLen));
@@ -102,7 +102,7 @@ static char *strAppend(char *a, char *b) {
  * Returns true if string begins with a pattern.
  * If pattern longer than string it will not to produce a segmentation fault
  **/
-static bool isStartsWith(const char *pattern, char *string) {
+static inline bool isStartsWith(const char *pattern, char *string) {
 
     for (int c = 0; *(pattern + c) != '\0'; c++) {
 
@@ -119,7 +119,7 @@ static bool isStartsWith(const char *pattern, char *string) {
  * The sequence must be a C-string what means the last char of 
  * sequence will be '\0'
  **/
-static bool isInSequence(char *sequence, char symbol) {
+static inline bool isInSequence(char *sequence, char symbol) {
 
     for (char *c = sequence; *c != '\0'; c++) {
 
@@ -129,6 +129,16 @@ static bool isInSequence(char *sequence, char symbol) {
     }
 
     return false;
+}
+
+static inline char *charToString(char character) {
+
+    char *result = ALOC(CH_SIZE * 2);
+    *(result) = character;
+    *(result + 1) = '\0';
+
+    return result;
+
 }
 
 enum PatternCount {
@@ -144,7 +154,7 @@ typedef struct _pattern {
     struct _pattern *next;
 } Pattern;
 
-static Pattern *createPattern() {
+static inline Pattern *createPattern() {
 
     Pattern *pattern = ALOC(sizeof(Pattern));
     pattern->next = NULL;
@@ -153,7 +163,7 @@ static Pattern *createPattern() {
     return pattern;
 }
 
-static void freePattern(Pattern *pattern) {
+static inline void freePattern(Pattern *pattern) {
 
     Pattern *cursor = pattern;
     while (cursor != NULL) {
@@ -179,10 +189,6 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
     while (cursor != NULL) {
 
         const char current = *(input + inputIndex);
-
-        if (current == '\0' && cursor->count < 1) {
-            return false;
-        }
 
         bool isMatch = cursor->valueAny || 
             isInSequence(cursor->value, current);
@@ -267,7 +273,7 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
  * Copies bytes from string to allocated space.
  * Returns pointer to allocated space
  **/
-static char *toHeap(const char *string) {
+static inline char *toHeap(const char *string) {
     STR_LENGTH(len, string);
 
     char *allocated = ALOC(CH_SIZE * (len + 1));
@@ -296,6 +302,13 @@ static bool processSpecial(char **buffer, char character) {
 
         case '\\': *buffer = toHeap("\\"); return true; // TODO: Replace with cycle
 
+    }
+
+    char *specials = ".\\[]-()+*$^{}?";
+
+    if (isInSequence(specials, character)) {
+        *buffer = charToString(character);
+        return true;
     }
 
     return false;
@@ -348,7 +361,7 @@ static _RegError *processSequence(char **buffer, char *sequence) {
             
         } else if (current == '\\') {
             char *seq;
-            if(!processSpecial(&seq, *(sequence + c + 1))) {
+            if (!processSpecial(&seq, *(sequence + c + 1))) {
                 THROW_REG_ERR(c, "Invalid special character");
             }
 
@@ -407,12 +420,14 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
     /* Parsing expression */
     int nextIndex = 0;
     if (isStartsWith("[", pattern)) { // TODO: [^ catching
+
         int seqLen = 0;
-        while (*(pattern + seqLen + 1) != ']') { // TODO: catch pattern [\]]
+        while (*(pattern + seqLen + 1) != ']' || *(pattern + seqLen) == '\\') {
+
             if (*(pattern + seqLen + 1) == '\0') { 
                 THROW_REG_ERR(seqLen + 1, "Expected ']' but founded end of line");
             }
-            
+
             seqLen++;
         }
 
