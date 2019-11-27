@@ -62,6 +62,8 @@ printf("[RX_DEBUG] __regex_allocated_count=%d\n", __regex_allocated_count);
 
 #define CH_SIZE sizeof(char)
 
+typedef char byte;
+
 void _regex_free_error(_RegError *error) {
     if (error == NULL) return;
 
@@ -141,16 +143,21 @@ static inline char *charToString(char character) {
 
 }
 
-enum PatternCount {
-    ANY = -1,
-    ONE_OR_MORE = -2,
-    ONE_OR_NOT = -3
+enum {
+    CN_ANY = -1,
+    CN_ONE_OR_MORE = -2,
+    CN_ONE_OR_NOT = -3
+};
+
+enum {
+    PF_ANY_VALUE = 1,
+    PF_RX_NOT  = 2
 };
 
 typedef struct _pattern {
     char *value;
-    bool valueAny;
-    int count; /** -1 = *, -2 = +, -3 = ? */
+    byte flags;
+    int count;
     struct _pattern *next;
 } Pattern;
 
@@ -158,7 +165,7 @@ static inline Pattern *createPattern() {
 
     Pattern *pattern = ALOC(sizeof(Pattern));
     pattern->next = NULL;
-    pattern->valueAny = false;
+    pattern->flags = 0;
 
     return pattern;
 }
@@ -168,7 +175,10 @@ static inline void freePattern(Pattern *pattern) {
     Pattern *cursor = pattern;
     while (cursor != NULL) {
         Pattern *next = cursor->next;
-        FREE(cursor->value);
+
+        if (cursor->value != NULL)
+            FREE(cursor->value);
+
         FREE(cursor);
 
         cursor = next;
@@ -190,10 +200,13 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
 
         const char current = *(input + inputIndex);
 
-        bool isMatch = cursor->valueAny || 
+        bool isCharMatch = (cursor->flags & PF_ANY_VALUE ) || 
             isInSequence(cursor->value, current);
 
-        if (cursor->count == ANY) {
+        bool isMatch = (cursor->flags & PF_RX_NOT) ? 
+            !isCharMatch : isCharMatch;
+
+        if (cursor->count == CN_ANY) {
 
             if (!isMatch) {
                 cursor = cursor->next;
@@ -201,7 +214,7 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
                 inputIndex++;
             }
 
-        } else if (cursor->count == ONE_OR_MORE) {
+        } else if (cursor->count == CN_ONE_OR_MORE) {
 
             if (!isMatch && !patternCountPassed) {
                 return false;
@@ -215,7 +228,7 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
                 inputIndex++;
             }
             
-        } else if (cursor->count == ONE_OR_NOT) {
+        } else if (cursor->count == CN_ONE_OR_NOT) {
 
             if (isMatch) {
                 inputIndex++;
@@ -419,7 +432,11 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
 
     /* Parsing expression */
     int nextIndex = 0;
-    if (isStartsWith("[", pattern)) { // TODO: [^ catching
+    if (isStartsWith("[", pattern)) {
+
+        if (*(pattern + 1) == '^') {
+            dest->flags |= PF_RX_NOT;
+        }
 
         int seqLen = 0;
         while (*(pattern + seqLen + 1) != ']' || *(pattern + seqLen) == '\\') {
@@ -452,7 +469,7 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
 
     } else if (isStartsWith(".", pattern)) {
 
-        dest->valueAny = true;
+        dest->flags |= PF_ANY_VALUE;
         nextIndex = 1;
 
     } else if (isStartsWith("\\", pattern)) {

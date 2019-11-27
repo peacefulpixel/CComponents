@@ -29,5 +29,14 @@ int main(int argc, char **argv) {
     result = _regex_match(&error, &match, "[\\]]+\\[]\\.+", "]][]1");
     ASSERT_NOT_OK
 
+    result = _regex_match(&error, &match, "[^a-v]+ef", "yzwef");
+    ASSERT_OK
+
+    result = _regex_match(&error, &match, "[^a-v]+ef", "bef");
+    ASSERT_NOT_OK
+
+    result = _regex_match(&error, &match, "[a-c]*ab", "ab"); // TDD test
+    ASSERT_OK
+
     return 0;
 }
