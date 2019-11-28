@@ -186,15 +186,18 @@ static inline void freePattern(Pattern *pattern) {
 
 }
 
+static int beginIndex;
 /**
  * Processes the pattern and store matches.
  * Returns false if the input does not match a pattern
  **/
-static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
+static bool processPattern(Pattern *pattern, _RegMatch *match, char *srcInput) {
     
     Pattern *cursor = pattern;
     int inputIndex = 0;
     int patternCountPassed = 0;
+
+    char *input = srcInput + beginIndex;
 
     while (cursor != NULL) {
 
@@ -217,7 +220,7 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
         } else if (cursor->count == CN_ONE_OR_MORE) {
 
             if (!isMatch && !patternCountPassed) {
-                return false;
+                goto trynext;
             }
 
             if (!isMatch) {
@@ -239,7 +242,7 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
         } else if (cursor->count - patternCountPassed) {
 
             if (!isMatch) {
-                return false;
+                goto trynext;
             }
 
             patternCountPassed++;
@@ -253,19 +256,18 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
         }
     }
 
-    match->from = 0;
-    match->to   = inputIndex;
+    match->from = beginIndex;
+    match->to   = beginIndex + inputIndex;
     match->next = NULL;
 
-    while (*(input + inputIndex) != '\0') {
+    beginIndex += inputIndex;
+    while (*(input + beginIndex) != '\0') {
         
         match->next = ALOC(sizeof(_RegMatch));
-        if (processPattern(pattern, match->next, input + inputIndex)) {
+        if (processPattern(pattern, match->next, srcInput)) {
 
             _RegMatch *cursor = match->next;
             while (cursor != NULL) {
-                cursor->from += inputIndex;
-                cursor->to   += inputIndex;
                 cursor = cursor->next;
             }
 
@@ -275,11 +277,18 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *input) {
             match->next = NULL;
         }
 
-        inputIndex++;
+        beginIndex++;
 
     }
 
     return true;
+
+trynext:
+    if (*(srcInput + ++beginIndex) == '\0') 
+        return false;
+
+    return processPattern(pattern, match, srcInput);
+
 }
 
 /**
@@ -520,6 +529,7 @@ bool _regex_match(_RegError **error, _RegMatch **match, char *pattern, char *str
     Pattern *_pattern = createPattern();
 
     char *patternCopy = toHeap(pattern);
+    beginIndex = 0;
     *error = buildPattern(patternCopy, _pattern);
     FREE(patternCopy);
 
