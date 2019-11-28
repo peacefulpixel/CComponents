@@ -14,7 +14,7 @@ Here a list that describes some things that this custom regex supports:
 |  Feature  |   Status   |
 |:---------:| ---------- |
 | `$ and ^` |  In plans  |
-|  `[...]`  | Half-works |
+|  `[...]`  |   Works    |
 |    `*`    |   Works    |
 |    `+`    |   Works    |
 |    `?`    |   Works    |
