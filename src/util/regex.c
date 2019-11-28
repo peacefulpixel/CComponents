@@ -261,25 +261,28 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *srcInput) {
     match->next = NULL;
 
     beginIndex += inputIndex;
+    bool founded = false;
+    _RegMatch *newMatch = ALOC(sizeof(_RegMatch));
     while (*(input + beginIndex) != '\0') {
         
-        match->next = ALOC(sizeof(_RegMatch));
-        if (processPattern(pattern, match->next, srcInput)) {
+        if (processPattern(pattern, newMatch, srcInput)) {
 
-            _RegMatch *cursor = match->next;
+            _RegMatch *cursor = newMatch;
             while (cursor != NULL) {
                 cursor = cursor->next;
             }
 
+            founded = true;
             break;
-        } else {
-            FREE(match->next); // TODO: Minimize a memory allocations count in this cycle if it possible
-            match->next = NULL;
         }
 
         beginIndex++;
 
     }
+
+    if (!founded) { 
+        FREE(newMatch);
+    } else match->next = newMatch;
 
     return true;
 
