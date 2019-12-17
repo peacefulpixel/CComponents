@@ -19,14 +19,14 @@
 
 typedef struct __reg_error {
     char *message;
-    int index;
+    unsigned int index;
 } _RegError;
 
 void _regex_free_error(_RegError *error);
 
 typedef struct __reg_match {
-    int from;
-    int to;
+    unsigned int from;
+    unsigned int to;
     struct __reg_match *next;
 } _RegMatch;
 

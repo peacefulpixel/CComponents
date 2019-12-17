@@ -26,7 +26,8 @@ static long __regex_allocated_count = 0;
 #define ALOC(__SIZE__) malloc(__SIZE__); __regex_allocated_count++;
 #define FREE(__POINTER__) free(__POINTER__); __regex_allocated_count--;
 #define PRINT_ALLOCATED_COUNT \
-printf("[RX_DEBUG] __regex_allocated_count=%d\n", __regex_allocated_count);
+printf("[RX_DEBUG] __regex_allocated_count=%d\n", __regex_allocated_count); \
+__regex_allocated_count = 0;
 #else
 #define ALOC(__SIZE__) malloc(__SIZE__);
 #define FREE(__POINTER__) free(__POINTER__);
@@ -61,6 +62,17 @@ printf("[RX_DEBUG] __regex_allocated_count=%d\n", __regex_allocated_count);
 #endif
 
 #define CH_SIZE sizeof(char)
+
+#ifdef INIT_REG_MATCH
+#error INIT_REG_MATCH already defined
+#endif
+
+#define INIT_REG_MATCH(__REG_MATCH__) \
+    __REG_MATCH__->from = 0; \
+    __REG_MATCH__->to   = 0; \
+    __REG_MATCH__->next = NULL;
+
+static const unsigned int MAX_AMOUNT = 65535;
 
 typedef char byte;
 
@@ -106,7 +118,7 @@ static inline char *strAppend(char *a, char *b) {
  **/
 static inline bool isStartsWith(const char *pattern, char *string) {
 
-    for (int c = 0; *(pattern + c) != '\0'; c++) {
+    for (unsigned int c = 0; *(pattern + c) != '\0'; c++) {
 
         if (*(string + c) != *(pattern + c))
             return false;
@@ -144,12 +156,6 @@ static inline char *charToString(char character) {
 }
 
 enum {
-    CN_ANY = -1,
-    CN_ONE_OR_MORE = -2,
-    CN_ONE_OR_NOT = -3
-};
-
-enum {
     PF_ANY_VALUE = 1,
     PF_RX_NOT  = 2
 };
@@ -157,7 +163,8 @@ enum {
 typedef struct _pattern {
     char *value;
     byte flags;
-    int count;
+    unsigned int from;
+    unsigned int to;
     struct _pattern *next;
 } Pattern;
 
@@ -186,18 +193,81 @@ static inline void freePattern(Pattern *pattern) {
 
 }
 
-static int beginIndex;
+/**
+ * Checks a symbol matches the value of pattern
+ **/
+static inline bool isMatchPattern(Pattern *pattern, char symbol) {
+
+    const bool isAny = pattern->flags & PF_ANY_VALUE;
+    const bool isNot = pattern->flags & PF_RX_NOT;
+    const bool inSeq = isInSequence(pattern->value, symbol);
+
+    return isNot ? (!isAny && !inSeq) : (isAny || inSeq);
+
+}
+
+/**
+ * Processes a part of the pattern that contains a flexible amount of symbols.
+ * This function invokes processPattern() while it processes an amount and
+ * returns a final result of iteration
+ **/
+static bool processFlexibleCount(   Pattern *pattern,
+                                    _RegMatch *match,
+                                    char *srcInput);
 /**
  * Processes the pattern and store matches.
  * Returns false if the input does not match a pattern
  **/
-static bool processPattern(Pattern *pattern, _RegMatch *match, char *srcInput) {
+static bool processPattern(  Pattern *pattern,
+                            _RegMatch *match,
+                            char *srcInput);
+
+static bool processFlexibleCount(   Pattern *pattern,
+                                    _RegMatch *match,
+                                    char *input) {
+
+    const unsigned int range = pattern->to - pattern->from;
+
+    int availableRange = 0;
+    for (; availableRange < range; availableRange++) {
+
+        if (!isMatchPattern(pattern, *(input + availableRange)))
+            break;
+
+    }
+
+    do {
+
+        _RegMatch *newMatch;
+
+    process:
+        newMatch = ALOC(sizeof(_RegMatch));
+        newMatch->to = 0;
+
+        if (processPattern(pattern->next, newMatch, input + availableRange)) {
+
+            match->to += (unsigned int) availableRange + newMatch->to;
+            FREE(newMatch);
+            return true;
+
+        } else FREE(newMatch);
+
+        availableRange--;
+
+    } while (availableRange > 0);
+
+    if (availableRange == 0) goto process;
+
+    return false;
+}
+
+static bool processPattern( Pattern *pattern,
+                            _RegMatch *match,
+                            char *input) {
     
     Pattern *cursor = pattern;
-    int inputIndex = 0;
-    int patternCountPassed = 0;
-
-    char *input = srcInput + beginIndex;
+    unsigned int inputIndex = 0;
+    unsigned int patternCountPassed = 0;
 
     while (cursor != NULL) {
 
@@ -209,89 +279,34 @@ static bool processPattern(Pattern *pattern, _RegMatch *match, char *srcInput) {
         bool isMatch = (cursor->flags & PF_RX_NOT) ? 
             !isCharMatch : isCharMatch;
 
-        if (cursor->count == CN_ANY) {
+        if (cursor->from > patternCountPassed) {
 
             if (!isMatch) {
-                cursor = cursor->next;
-            } else {
-                inputIndex++;
-            }
-
-        } else if (cursor->count == CN_ONE_OR_MORE) {
-
-            if (!isMatch && !patternCountPassed) {
-                goto trynext;
-            }
-
-            if (!isMatch) {
-                cursor = cursor->next;
-                patternCountPassed = 0;
-            } else {
-                patternCountPassed++;
-                inputIndex++;
-            }
-            
-        } else if (cursor->count == CN_ONE_OR_NOT) {
-
-            if (isMatch) {
-                inputIndex++;
-            }
-
-            cursor = cursor->next;
-
-        } else if (cursor->count - patternCountPassed) {
-
-            if (!isMatch) {
-                goto trynext;
+                return false;
             }
 
             patternCountPassed++;
             inputIndex++;
 
+        } else if (cursor->from < cursor->to) {
+
+            if (processFlexibleCount(cursor, match, input + inputIndex))
+                break;
+
+            return false;
+
         } else {
 
-            patternCountPassed = 0;
             cursor = cursor->next;
+            patternCountPassed = 0;
 
         }
     }
 
-    match->from = beginIndex;
-    match->to   = beginIndex + inputIndex;
+    match->to  += inputIndex;
     match->next = NULL;
 
-    beginIndex += inputIndex;
-    bool founded = false;
-    _RegMatch *newMatch = ALOC(sizeof(_RegMatch));
-    while (*(input + beginIndex) != '\0') {
-        
-        if (processPattern(pattern, newMatch, srcInput)) {
-
-            _RegMatch *cursor = newMatch;
-            while (cursor != NULL) {
-                cursor = cursor->next;
-            }
-
-            founded = true;
-            break;
-        }
-
-        beginIndex++;
-
-    }
-
-    if (!founded) { 
-        FREE(newMatch);
-    } else match->next = newMatch;
-
     return true;
-
-trynext:
-    if (*(srcInput + ++beginIndex) == '\0') 
-        return false;
-
-    return processPattern(pattern, match, srcInput);
-
 }
 
 /**
@@ -346,7 +361,7 @@ static bool processSpecial(char **buffer, char character) {
  **/
 static _RegError *processSequence(char **buffer, char *sequence) {
 
-    for (int c = 0; *(sequence + c) != '\0'; c++) {
+    for (unsigned int c = 0; *(sequence + c) != '\0'; c++) {
         char current = *(sequence + c);
         
         /*
@@ -411,23 +426,25 @@ static _RegError *processSequence(char **buffer, char *sequence) {
  * Processes a regex count modificators like +, *, etc.
  * Returns true if pattern begin like one of modificators
  **/
-static bool processCount(char *pattern, int *count, int *rpLength) {
+static bool processCount(char *pattern, unsigned int *countFrom,
+                         unsigned int *countTo, unsigned int *rpLength) {
 
-    const int supportedCount = 3; /* Amount of supported modificators */
+    const unsigned int supportedCount = 3; /* Amount of supported modificators */
 
     const struct { 
-        const char *ptrn; int count; int ptrnLength;
+        const char *ptrn; unsigned int from; unsigned int to;
     } countPatterns[] = {
-        { "*", -1, 1 },
-        { "+", -2, 1 },
-        { "?", -3, 1 }
+        { "*", 0, MAX_AMOUNT },
+        { "+", 1, MAX_AMOUNT },
+        { "?", 0, 1 }
     };
     
-    for (int c = 0; c < supportedCount; c++) {
+    for (unsigned int c = 0; c < supportedCount; c++) {
 
         if (isStartsWith(countPatterns[c].ptrn, pattern)) {
-            *count = countPatterns[c].count;
-            *rpLength = countPatterns[c].ptrnLength;
+            *countFrom = countPatterns[c].from;
+            *countTo   = countPatterns[c].to;
+            *rpLength  = 1; // it will be required by the {0, ...} feature
 
             return true;
         }
@@ -443,14 +460,15 @@ static bool processCount(char *pattern, int *count, int *rpLength) {
 static _RegError *buildPattern(char *pattern, Pattern *dest) {
 
     /* Parsing expression */
-    int nextIndex = 0;
+    unsigned int nextIndex = 0;
     if (isStartsWith("[", pattern)) {
 
         if (*(pattern + 1) == '^') {
             dest->flags |= PF_RX_NOT;
+            pattern++;
         }
 
-        int seqLen = 0;
+        unsigned int seqLen = 0;
         while (*(pattern + seqLen + 1) != ']' || *(pattern + seqLen) == '\\') {
 
             if (*(pattern + seqLen + 1) == '\0') { 
@@ -496,8 +514,8 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
 
     } else {
 
-        int count, len;
-        if (processCount(pattern, &count, &len)) {
+        unsigned int count, len;
+        if (processCount(pattern, &count, &count, &len)) {
             THROW_REG_ERR(0, "Declaration of count is unexpected here")
         }
 
@@ -509,11 +527,12 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
     }
 
     /* Parsing expression matching count */
-    int count, len = 0;
-    if (!processCount(pattern + nextIndex, &count, &len)) {
-        dest->count = 1;
+    unsigned int countFrom, countTo, len = 0;
+    if (!processCount(pattern + nextIndex, &countFrom, &countTo, &len)) {
+        dest->from = dest->to = 1;
     } else {
-        dest->count = count;
+        dest->from = countFrom;
+        dest->to = countTo;
         nextIndex += len;
     }
 
@@ -532,7 +551,6 @@ bool _regex_match(_RegError **error, _RegMatch **match, char *pattern, char *str
     Pattern *_pattern = createPattern();
 
     char *patternCopy = toHeap(pattern);
-    beginIndex = 0;
     *error = buildPattern(patternCopy, _pattern);
     FREE(patternCopy);
 
@@ -541,9 +559,31 @@ bool _regex_match(_RegError **error, _RegMatch **match, char *pattern, char *str
     }
 
     *match = ALOC(sizeof(_RegMatch));
+    INIT_REG_MATCH((*match));
 
     char *strCopy = toHeap(str);
-    bool result = processPattern(_pattern, *match, strCopy);
+    bool result = false;
+    _RegMatch *cursor = *match;
+
+    for (unsigned int c = 0; *(strCopy + c) != '\0'; c++) {
+        if (processPattern(_pattern, cursor, strCopy + c)) {
+
+            result = true;
+
+            unsigned int newC = c + cursor->to - 1;
+            cursor->next = ALOC(sizeof(_RegMatch));
+            cursor->from += c;
+            cursor->to += c;
+
+            c = newC;
+
+            cursor = cursor->next;
+            INIT_REG_MATCH(cursor);
+
+        }
+    }
+
+    FREE(cursor->next);
     FREE(strCopy);
 
     if (!result) {
