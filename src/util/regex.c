@@ -157,7 +157,8 @@ static inline char *charToString(char character) {
 
 enum {
     PF_ANY_VALUE = 1,
-    PF_RX_NOT  = 2
+    PF_RX_NOT    = 2,
+    PF_RX_BEGIN  = 4,
 };
 
 typedef struct _pattern {
@@ -194,15 +195,23 @@ static inline void freePattern(Pattern *pattern) {
 }
 
 /**
+ * Indicates the first character of input was processed or not
+ **/
+static bool isBeginProcessed;
+
+/**
  * Checks a symbol matches the value of pattern
  **/
 static inline bool isMatchPattern(Pattern *pattern, char symbol) {
 
     const bool isAny = pattern->flags & PF_ANY_VALUE;
     const bool isNot = pattern->flags & PF_RX_NOT;
+    const bool isBeg = pattern->flags & PF_RX_BEGIN;
     const bool inSeq = isInSequence(pattern->value, symbol);
 
-    return isNot ? (!isAny && !inSeq) : (isAny || inSeq);
+    return isNot ?
+        ((!isAny && !inSeq) ||  isBeg):
+        (( isAny ||  inSeq) && !isBeg);
 
 }
 
@@ -273,11 +282,21 @@ static bool processPattern( Pattern *pattern,
 
         const char current = *(input + inputIndex);
 
-        bool isCharMatch = (cursor->flags & PF_ANY_VALUE ) || 
-            isInSequence(cursor->value, current);
+        if (cursor->flags & PF_RX_BEGIN) {
 
-        bool isMatch = (cursor->flags & PF_RX_NOT) ? 
-            !isCharMatch : isCharMatch;
+            if (!inputIndex && !isBeginProcessed) {
+
+                cursor = cursor->next;
+                isBeginProcessed = true;
+                continue;
+
+            } else return false;
+
+        }
+
+        bool isMatch = isMatchPattern(cursor, current);
+
+        isBeginProcessed = true;
 
         if (cursor->from > patternCountPassed) {
 
@@ -512,6 +531,11 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
         dest->value = seq;
         nextIndex = 2;
 
+    } else if (isStartsWith("^", pattern)) {
+
+        dest->flags |= PF_RX_BEGIN;
+        nextIndex = 1;
+
     } else {
 
         unsigned int count, len;
@@ -565,7 +589,9 @@ bool _regex_match(_RegError **error, _RegMatch **match, char *pattern, char *str
     bool result = false;
     _RegMatch *cursor = *match;
 
-    for (unsigned int c = 0; *(strCopy + c) != '\0'; c++) {
+    isBeginProcessed = false;
+
+    for (unsigned int c = 0; c < 1 || (*(strCopy + c - 1) != '\0'); c++) {
         if (processPattern(_pattern, cursor, strCopy + c)) {
 
             result = true;
