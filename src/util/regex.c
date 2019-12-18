@@ -204,7 +204,7 @@ static bool isBeginProcessed;
  **/
 static inline bool isMatchPattern(Pattern *pattern, char symbol) {
 
-    const bool isAny = pattern->flags & PF_ANY_VALUE;
+    const bool isAny = (pattern->flags & PF_ANY_VALUE) && symbol != '\0';
     const bool isNot = pattern->flags & PF_RX_NOT;
     const bool isBeg = pattern->flags & PF_RX_BEGIN;
     const bool inSeq = isInSequence(pattern->value, symbol);
@@ -596,7 +596,7 @@ bool _regex_match(_RegError **error, _RegMatch **match, char *pattern, char *str
 
             result = true;
 
-            unsigned int newC = c + cursor->to - 1;
+            unsigned int newC = c + cursor->to - !(cursor->to == cursor->from);
             cursor->next = ALOC(sizeof(_RegMatch));
             cursor->from += c;
             cursor->to += c;
