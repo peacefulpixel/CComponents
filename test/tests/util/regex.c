@@ -28,6 +28,11 @@ int main(int argc, char **argv) {
     _RegMatch *match;
     bool result;
 
+    result = _regex_match(&error, &match, "", "");
+    ASSERT_OK
+    ASSERT_MATCH(0, 0, 0);
+    FREE
+
     result = _regex_match(&error, &match, "dr[o-zA-V\\d]+r*i", "drEpr2i");
     ASSERT_OK
     ASSERT_MATCH(0, 0, 7);
@@ -101,6 +106,45 @@ int main(int argc, char **argv) {
     ASSERT_NOT_OK
     FREE
 
+    result = _regex_match(&error, &match, ".*", "abc");
+    ASSERT_OK
+    ASSERT_MATCH(0, 0, 3);
+    ASSERT_MATCH(1, 3, 3);
+    FREE
+
+    result = _regex_match(&error, &match, "[a-b]*.*", "bublik");
+    ASSERT_OK
+    ASSERT_MATCH(0, 0, 6);
+    ASSERT_MATCH(1, 6, 6);
+    FREE
+
+    result = _regex_match(&error, &match, ".*", "");
+    ASSERT_OK
+    ASSERT_MATCH(0, 0, 0);
+    FREE
+
+    result = _regex_match(&error, &match, ".?", "abc");
+    ASSERT_OK
+    ASSERT_MATCH(0, 0, 1);
+    ASSERT_MATCH(1, 1, 2);
+    ASSERT_MATCH(2, 2, 3);
+    ASSERT_MATCH(3, 3, 3);
+    FREE
+
+    result = _regex_match(&error, &match, "^", "");
+    ASSERT_OK
+    ASSERT_MATCH(0, 0, 0);
+    FREE
+
+    result = _regex_match(&error, &match, "^abc", "abc");
+    ASSERT_OK
+    ASSERT_MATCH(0, 0, 3);
+    FREE
+
+    result = _regex_match(&error, &match, "^ab^c", "abc");
+    ASSERT_NOT_OK
+    FREE
+
     result = _regex_match(&error, &match, "^$", "");
     ASSERT_OK
     ASSERT_MATCH(0, 0, 0);
@@ -121,14 +165,14 @@ int main(int argc, char **argv) {
 
     result = _regex_match(&error, &match, "^abc", "abcdef");
     ASSERT_OK
-    ASSERT_MATCH(0, 0, 6);
+    ASSERT_MATCH(0, 0, 3);
     FREE
 
     result = _regex_match(&error, &match, "^abc", "aabcdef");
     ASSERT_NOT_OK
     FREE
 
-    result = _regex_match(&error, &match, "abc$", "0123abc");
+    result = _regex_match(&error, &match, "abc$", "0abcabc");
     ASSERT_OK
     ASSERT_MATCH(0, 4, 7);
     FREE
@@ -149,8 +193,7 @@ int main(int argc, char **argv) {
     result = _regex_match(&error, &match, "(abc[x-z]*)+$", 
         "abc8abcabcyabczzzxy");
     ASSERT_OK
-    ASSERT_MATCH(0, 4, 11);
-    ASSERT_MATCH(1, 11, 19);
+    ASSERT_MATCH(0, 4, 19);
     FREE
 
     result = _regex_match(&error, &match, "(abc[x-z]*)+$", "abczab");
@@ -165,12 +208,26 @@ int main(int argc, char **argv) {
     result = _regex_match(&error, &match, "(abc|bca)+", "abaca");
     ASSERT_NOT_OK
 
-    result = _regex_match(&error, &match, "[\\S\\W\\D]+", "& 2w");
+    result = _regex_match(&error, &match, "(abc|def|ghj)", "abcdeffffghj");
+    ASSERT_OK
+    ASSERT_MATCH(0, 0, 3);
+    ASSERT_MATCH(1, 3, 6);
+    ASSERT_MATCH(2, 9, 12);
+    FREE
+
+    result = _regex_match(&error, &match, "(abc|def|ghj)", "abdegh");
+    ASSERT_NOT_OK
+
+    result = _regex_match(&error, &match, "[\\S\\W\\D]+", " 2w");
     ASSERT_OK
     ASSERT_MATCH(0, 0, 4);
     FREE
 
-    result = _regex_match(&error, &match, "[\\S\\W\\D]+", " 2w");
+    result = _regex_match(&error, &match, "[\\S]+", " ");
+    ASSERT_NOT_OK
+    FREE
+
+    result = _regex_match(&error, &match, "[\\W]+", "d");
     ASSERT_NOT_OK
     FREE
 

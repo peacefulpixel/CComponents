@@ -159,6 +159,7 @@ enum {
     PF_ANY_VALUE = 1,
     PF_RX_NOT    = 2,
     PF_RX_BEGIN  = 4,
+    PF_RX_EMPTY  = 8,
 };
 
 typedef struct _pattern {
@@ -172,6 +173,7 @@ typedef struct _pattern {
 static inline Pattern *createPattern() {
 
     Pattern *pattern = ALOC(sizeof(Pattern));
+    pattern->value = NULL; // Required only by isMatchPattern
     pattern->next = NULL;
     pattern->flags = 0;
 
@@ -204,14 +206,28 @@ static bool isBeginProcessed;
  **/
 static inline bool isMatchPattern(Pattern *pattern, char symbol) {
 
-    const bool isAny = (pattern->flags & PF_ANY_VALUE) && symbol != '\0';
+    const bool isAny = pattern->flags & PF_ANY_VALUE;
     const bool isNot = pattern->flags & PF_RX_NOT;
     const bool isBeg = pattern->flags & PF_RX_BEGIN;
-    const bool inSeq = isInSequence(pattern->value, symbol);
+    const bool inSeq = isAny || isInSequence(pattern->value, symbol);
 
-    return isNot ?
-        ((!isAny && !inSeq) ||  isBeg):
-        (( isAny ||  inSeq) && !isBeg);
+    /* This variable is necessary because an isAny will be true even if the
+       symbol are '\0'. This is incorrect and will to produce segmentation
+       faults by parsing a memory that is beyond of allocated space for string
+       what we parse.
+
+       If just to add code to isAny expression like:
+           && symbol != '\0'
+       Then isInSequence might be invoked with a sequence that NULL, what
+       will produce segfault
+       */
+
+    const bool isInv = pattern->value == NULL && isAny && symbol == '\0';
+
+    return  (isNot ?
+                (!inSeq ||  isBeg):
+                ( inSeq && !isBeg))
+            && !isInv;
 
 }
 
@@ -278,7 +294,7 @@ static bool processPattern( Pattern *pattern,
     unsigned int inputIndex = 0;
     unsigned int patternCountPassed = 0;
 
-    while (cursor != NULL) {
+    while (cursor != NULL && !(cursor->flags & PF_RX_EMPTY)) {
 
         const char current = *(input + inputIndex);
 
@@ -535,6 +551,22 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
 
         dest->flags |= PF_RX_BEGIN;
         nextIndex = 1;
+
+    } else if (*pattern == '\0') {
+
+        /* This case might be reached only at the first invoking of
+           buildPattern if an expression is empty line here. In other calls
+           into recursion this case will be never reached because before
+           buildPattern are invoking themselves, it will check the
+           *(pattern + nextIndex) != '\0' what makes this code unreachable
+
+           So this code was written only because, in most popular regex
+           implementations, expression match("", "") will return one match
+           that begins at 0 and ends at 0
+           */
+
+        dest->flags |= PF_RX_EMPTY;
+        return NULL;
 
     } else {
 
