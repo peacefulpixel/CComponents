@@ -160,6 +160,7 @@ enum {
     PF_RX_NOT    = 2,
     PF_RX_BEGIN  = 4,
     PF_RX_EMPTY  = 8,
+    PF_RX_ENDLN  = 16,
 };
 
 typedef struct _pattern {
@@ -307,6 +308,17 @@ static bool processPattern( Pattern *pattern,
                 continue;
 
             } else return false;
+
+        }
+
+        if (cursor->flags & PF_RX_ENDLN) {
+
+            if (current) {
+                return false;
+            } else {
+                cursor = cursor->next;
+                continue;
+            }
 
         }
 
@@ -550,6 +562,11 @@ static _RegError *buildPattern(char *pattern, Pattern *dest) {
     } else if (isStartsWith("^", pattern)) {
 
         dest->flags |= PF_RX_BEGIN;
+        nextIndex = 1;
+
+    } else if (isStartsWith("$", pattern)) {
+
+        dest->flags |= PF_RX_ENDLN;
         nextIndex = 1;
 
     } else if (*pattern == '\0') {

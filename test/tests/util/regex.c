@@ -177,6 +177,10 @@ int main(int argc, char **argv) {
     ASSERT_MATCH(0, 4, 7);
     FREE
 
+    result = _regex_match(&error, &match, "ab$c", "0abcabc");
+    ASSERT_NOT_OK
+    FREE
+
     result = _regex_match(&error, &match, "abc$", "0123abcd");
     ASSERT_NOT_OK
     FREE
