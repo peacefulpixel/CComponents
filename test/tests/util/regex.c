@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "../../../src/util/regex.h"
+#include "../../../src/ccomponents.h"
 
 #define FREE _regex_free_error(error); _regex_free_match(match); match = NULL;
 
@@ -185,6 +186,7 @@ int main(int argc, char **argv) {
     ASSERT_NOT_OK
     FREE
 
+#if CCOMP_V_MA > 0 || CCOMP_V_MI > 2
     result = _regex_match(&error, &match, "(abc)+$", "abcabc");
     ASSERT_OK
     ASSERT_MATCH(0, 0, 6);
@@ -234,6 +236,7 @@ int main(int argc, char **argv) {
     result = _regex_match(&error, &match, "[\\W]+", "d");
     ASSERT_NOT_OK
     FREE
+#endif
 
     result = _regex_match(&error, &match, "a{0,3}[a-z]{4,}", "aaaz");
     ASSERT_OK

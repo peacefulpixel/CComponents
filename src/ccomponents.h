@@ -1,6 +1,10 @@
 #ifndef __C_COMPONENTS_H__
 #define __C_COMPONENTS_H__
 
+#define CCOMP_V_MA 0
+#define CCOMP_V_MI 0
+#define CCOMP_V_PA 1
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

@@ -112,6 +112,33 @@ static inline char *strAppend(char *a, char *b) {
     return(strAppendSome(a, b, bLen));
 }
 
+static inline unsigned int strToInt(char *string) {
+
+    unsigned int result = 0;
+    for (unsigned int c = 0; *(string + c); c++) {
+
+        result *= 10;
+        result += (unsigned int) *(string + c) - 48;
+
+    }
+
+    return result;
+
+}
+
+static inline bool isInt(char *string) {
+
+    for (unsigned int c = 0; *(string + c); c++) {
+
+        if (*(string + c) < 48 || *(string + c) > 57)
+            return false;
+
+    }
+
+    return true;
+
+}
+
 /**
  * Returns true if string begins with a pattern.
  * If pattern longer than string it will not to produce a segmentation fault
@@ -476,6 +503,57 @@ static _RegError *processSequence(char **buffer, char *sequence) {
 static bool processCount(char *pattern, unsigned int *countFrom,
                          unsigned int *countTo, unsigned int *rpLength) {
 
+    if (*pattern == '{') {
+
+        flag__ = true;
+
+        /* If _countTo are been less than _countFrom execution result will be
+           FALSE. It means the regex engine will recognize it as just a string.
+           */
+
+        char *_countFrom = pattern + 1,
+             *_countTo = NULL;
+
+        size_t bracketIndex;
+
+        for (char *p = pattern;; p++) {
+
+            if (!*p) return false;
+            if (*p == ',') {
+                *p = '\0';
+                _countTo = p + 1;
+            } else if (*p == '}') {
+                if (_countTo == NULL)
+                    return false;
+
+                *p = '\0';
+                bracketIndex = (size_t) (p - pattern);
+                break;
+            }
+
+        }
+
+        if (!isInt(_countFrom) || *_countFrom == '\0' || !isInt(_countTo))
+            return false;
+
+        *countFrom = strToInt(_countFrom);
+        *countTo   = *_countTo == '\0' ? MAX_AMOUNT : strToInt(_countTo);
+
+        /*  It's bad to write to result buffers and return false but faster
+            than create private buffers.
+            */
+
+        if (*countTo < *countFrom)
+            return false;
+
+        *rpLength  = bracketIndex + 1;
+
+        *(_countTo - 1) = ',';
+        *(pattern + bracketIndex) = '}';
+
+        return true;
+    }
+
     const unsigned int supportedCount = 3; /* Amount of supported modificators */
 
     const struct { 
@@ -491,7 +569,7 @@ static bool processCount(char *pattern, unsigned int *countFrom,
         if (isStartsWith(countPatterns[c].ptrn, pattern)) {
             *countFrom = countPatterns[c].from;
             *countTo   = countPatterns[c].to;
-            *rpLength  = 1; // it will be required by the {0, ...} feature
+            *rpLength  = 1;
 
             return true;
         }
