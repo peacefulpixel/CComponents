@@ -10,22 +10,20 @@ If it don't satisfies yours requirements, you just can to replace `src/util/rege
 
 Here a list that describes some things that this custom regex supports:
 
-**TODO: Replace this table columns to | Pattern | Description |**
-
-|  Feature  |   Status   |
-|:---------:| ---------- |
-| `$ and ^` |   Works    |
-|  `[...]`  |   Works    |
-|    `*`    |   Works    |
-|    `+`    |   Works    |
-|    `?`    |   Works    |
-|   `\s`    |   Works    |
-|   `\w`    |   Works    |
-|   `\d`    |   Works    |
-|   `\S`    |  In 0.0.2  |
-|   `\W`    |  In 0.0.2  |
-|   `\D`    |  In 0.0.2  |
-|    `.`    |   Works    |
-|   `()`    |  In 0.0.2  |
-|  `(\|)`   |  In 0.0.2  |
-|  `{0,3}`  |   Works    |
+|  Pattern  | Description                                                                        |
+|:---------:| ---------------------------------------------------------------------------------- |
+| `$ and ^` | Means a begin (^) and end ($) of line                                              |
+|  `[...]`  | A symbol sequence what recognizes as one unit                                      |
+|    `*`    | Indicates **any** amount of unit that described before                             |
+|    `+`    | Indicates **one or more** unit amount                                              |
+|    `?`    | Indicates **one or zero** unit amount                                              |
+|   `\s`    | Space characters: `\r\n\t\f\v `                                                    |
+|   `\w`    | Word characters: `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_` |
+|   `\d`    | Digit characters: `0123456789`                                                     |
+|   `\S`    | **Will available after 0.0.2 release** Non-space characters                        |
+|   `\W`    | **Will available after 0.0.2 release** Non-word characters                         |
+|   `\D`    | **Will available after 0.0.2 release** Non-digit characters                        |
+|    `.`    | Means any character                                                                |
+|   `()`    | **Will available after 0.0.2 release** Subexpression as a single unit              |
+|  `(\|)`   | **Will available after 0.0.2 release** Logical **or** between subexpressions       |
+|  `{0,3}`  | The custom range of unit matches (`{3,}` works too)                                |
