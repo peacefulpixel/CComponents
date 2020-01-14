@@ -44,30 +44,46 @@ namespace eval tests {
         set test_src $list($test_name)
 
         set code [ catch { exec "./$test_src" } output ]
-        if   {$code != 0} { puts "[ ::message::test_failed  $test_name ]$output" }\
+        if   {$code != 0} { puts "[ ::message::test_failed  $test_name ]          $output" }\
         else              { puts  [ ::message::test_success $test_name ] }
     }
 
-    proc fill_list {} {
-        variable list
+    proc fill_list { test_dir } {
+        array set list_rs {}
 
-        cd $::path::test_dir
+        cd $test_dir
         set tfile_list {}
-        if { [ catch { set tfile_list [ glob "*$::path::test_suf" ] } output ] 
+        if { [ catch { set tfile_list [ glob "*" ] } output ] 
         &&   $::conf::print_debug } {
             puts [ ::message::glob_exception $output ]
-            exit 1
+            return
         }
 
         foreach tfile $tfile_list {
-            set tfile_fchar [ string index $tfile 0 ]
-            set list("[ string toupper $tfile_fchar ][ string trimright [ string trimleft $tfile $tfile_fchar ] $::path::test_suf ]") "$tfile"
+
+            if { [ file isdirectory $tfile ] } {
+
+                set current_dir [ pwd ]
+                array set list_rsr [ fill_list $tfile ]
+                foreach { key val } [ array get list_rsr ] {
+                    set list_rs("$tfile/$key") "$tfile/$val"
+                }
+                cd $current_dir
+
+            } elseif { [ string match "*$::path::test_suf" $tfile ] } {
+                set list_rs("[ string trimright $tfile $::path::test_suf ]") "$tfile"
+            }
         }
+
+        return [ array get list_rs ]
     }
 
     proc test_all {} {
-        fill_list
+
         variable list
+        array set list_rs [ fill_list $::path::test_dir ]
+        array set list [ array get list_rs ]
+
         if { $::conf::print_debug } { 
             puts [ ::message::tests_detected [ array size list ] ]
         }
