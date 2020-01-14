@@ -1,17 +1,3 @@
-/**
- * The regular expressions are required by CComponents library for some
- * components methods implementation (String.match as an example). The reason
- * for creating custom regex realization is library independence and
- * cross-platform building and usage.
- * 
- * Native regex implementation for C supports only in UNIX systems
- * like OS X or Linux. The header <regex.h> does not exist on the Windows
- * platform and MinGW doesn't provide it.
- * 
- * PCRE2 usage will cause an additional project dependency that must be
- * installed by library users for build or usage.
- **/
-
 #ifndef __REGEX_H__
 #define __REGEX_H__
 
@@ -40,4 +26,4 @@ bool _regex_match(  _RegError **error,
                     char *pattern,
                     char *str);
 
-#endif
+#endif /* __REGEX_H__ */
