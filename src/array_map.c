@@ -12,7 +12,7 @@ typedef struct _map_private {
     unsigned long int mapSize;
 } Private;
 
-static long int __map_indexOfKey(ArrayList *keys, char *key) {    
+static long int indexOfKey(ArrayList *keys, char *key) {
     for (unsigned long int index = 0; index < keys->class->_impl_List.length(keys); index++) {
         String *currentKey = (String *) keys->class->_impl_List.get(keys, index);
         if (currentKey->class->equalsChr(currentKey, key))
@@ -20,10 +20,10 @@ static long int __map_indexOfKey(ArrayList *keys, char *key) {
     } return -1;
 }
 
-static void __map_remove(void *_this, char *key) {
+extern void __CComp_ArrayMap_implMap_remove(void *_this, char *key) {
     Private *private = (Private *) this->_private;
 
-    unsigned long int index = __map_indexOfKey(private->keys, key);
+    unsigned long int index = indexOfKey(private->keys, key);
 
     delete(((String *) private->keys->class->_impl_List.get(private->keys, index)));
     private->keys->class->_impl_List.remove(private->keys, index);
@@ -32,9 +32,9 @@ static void __map_remove(void *_this, char *key) {
     private->mapSize--;
 }
 
-static void __map_set(void *_this, char *key, void *value) {
+extern void __CComp_ArrayMap_implMap_set(void *_this, char *key, void *value) {
     Private *private = (Private *) this->_private;
-    unsigned long int index = __map_indexOfKey(private->keys, key);
+    unsigned long int index = indexOfKey(private->keys, key);
 
     if (index == -1) {
         String *newKey = CreateString(key);
@@ -46,30 +46,30 @@ static void __map_set(void *_this, char *key, void *value) {
 
         private->mapSize++;
 
-        // More fast then call __map_indexOfKey() again
+        // More fast then call indexOfKey() again
         index = private->keys->class->_impl_List.length(private->keys) - 1;
     }
 
     private->values->class->_impl_List.set(private->values, index, value);
 }
 
-static void *__map_get(void *_this, char *key) {
+extern void *__CComp_ArrayMap_implMap_get(void *_this, char *key) {
     Private *private = (Private *) this->_private;
-    long int index = __map_indexOfKey(private->keys, key);
+    long int index = indexOfKey(private->keys, key);
 
-    if (index == -1) //TODO: Catch the element existence by another way. __map_indexOfKey must return unsigned long int
+    if (index == -1) //TODO: Catch the element existence by another way. indexOfKey must return unsigned long int
         return NULL;
 
     return private->values->class->_impl_List.get(private->values, (unsigned long int) index);
 }
 
-static unsigned long int __map_length(void *_this) {
+extern unsigned long int __CComp_ArrayMap_implMap_length(void *_this) {
     Private *private = (Private *) this->_private;
 
     return private->mapSize;
 }
 
-static String *__map_toString(void *_this) {
+extern String *__CComp_ArrayMap_implObject_toString(void *_this) {
     unsigned long int mapLength = this->class->_impl_Map.length(this);
     Private *private = (Private *) this->_private;
     ArrayList *keys = private->keys;
@@ -94,7 +94,7 @@ static String *__map_toString(void *_this) {
     return result;
 }
 
-static void *__map_copy(void *_this) {
+extern void *__CComp_ArrayMap_implObject_copy(void *_this) {
     ArrayMap *newArrayMap = createArrayMap();
     Private *nmPrivate = (Private *) newArrayMap->_private;
     ArrayList *nKeys = nmPrivate->keys;
@@ -127,7 +127,7 @@ extern ArrayMap *createArrayMap() {
     return newArrayMap;
 }
 
-static void __map_delete(void *_this) {
+extern void __CComp_Cls_ArrayMap_delete(void *_this) {
     Private *private = (Private *) this->_private;
 
     delete(private->keys);
@@ -139,19 +139,19 @@ static void __map_delete(void *_this) {
 ClassArrayMapType ClassArrayMap = {
     {
         INTERFACE_MAP,
-        &__map_remove,
-        &__map_set,
-        &__map_get,
-        &__map_length,
+        &__CComp_ArrayMap_implMap_remove,
+        &__CComp_ArrayMap_implMap_set,
+        &__CComp_ArrayMap_implMap_get,
+        &__CComp_ArrayMap_implMap_length,
         {
             INTERFACE_CCOBJECT,
-            &__map_toString,
-            &__map_copy
+            &__CComp_ArrayMap_implObject_toString,
+            &__CComp_ArrayMap_implObject_copy
         }
     }
 };
 
 Class classArrayMap = {
     .classType = CLASS_ARRAY_MAP,
-    .delete    = &__map_delete
+    .delete    = &__CComp_Cls_ArrayMap_delete
 };

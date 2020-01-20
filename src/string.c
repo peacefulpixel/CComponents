@@ -18,12 +18,12 @@ typedef struct _string_private {
     char *stringValue;
 } Private;
 
-static char *__string_get(void *_this) {
+extern char *__CComp_String_get(void *_this) {
     Private *private = (Private *) this->_private;
     return private->stringValue;
 }
 
-static void __string_set(void *_this, char *value) {
+extern void __CComp_String_set(void *_this, char *value) {
     int memSize = (int) (sizeof(char) * strlen(value));
 
     free(((Private *) this->_private)->stringValue);
@@ -35,7 +35,7 @@ static void __string_set(void *_this, char *value) {
     memcpy(stringValue->stringValue + memSize, "\0", 1);
 }
 
-static void __string_add(void *_this, char *value) {
+extern void __CComp_String_add(void *_this, char *value) {
     int aSize = (int) (sizeof(char) * strlen(this->class->getValue(this)));
     int bSize = (int) (sizeof(char) * strlen(value));
 
@@ -52,7 +52,7 @@ static void __string_add(void *_this, char *value) {
     free(aDump);
 }
 
-static String *__string_sub(void *_this, int begin, int end) {
+extern String *__CComp_String_sub(void *_this, int begin, int end) {
     int size = (int) sizeof(char) * (end - begin);
 
     char *newValue = (char *) malloc((size_t) size + 1);
@@ -67,7 +67,7 @@ static String *__string_sub(void *_this, int begin, int end) {
 
 #ifndef _WIN32
 
-static void __string_replace(void *_this, char *regex, char *value) {
+extern void __CComp_String_replace(void *_this, char *regex, char *value) {
     String *current = createStringChar(this->class->getValue(this));
     StringMatch *match = current->class->match(current, regex, 1);
 
@@ -100,7 +100,7 @@ static void __string_replace(void *_this, char *regex, char *value) {
     delete(builder);
 }
 
-static void __string_replaceFirst(void *_this, char *regex, char *value) {
+extern void __CComp_String_replaceFirst(void *_this, char *regex, char *value) {
     StringMatch *match = this->class->match(this, regex, 1);
 
     if (match->begin == -1 || match->begin == -2)
@@ -121,7 +121,7 @@ static void __string_replaceFirst(void *_this, char *regex, char *value) {
     free(newValue);
 }
 
-static StringMatch *__string_match(void *_this, char *regex, int maxMatchesCount) {
+extern StringMatch *__CComp_String_match(void *_this, char *regex, int maxMatchesCount) {
     regex_t regexObject;
 
     StringMatch *matchesResult = (StringMatch *) malloc((size_t) maxMatchesCount * sizeof(matchesResult));
@@ -158,7 +158,7 @@ static StringMatch *__string_match(void *_this, char *regex, int maxMatchesCount
     return matchesResult;
 }
 
-static ArrayList *__string_split(void *_this, char *regex) {
+extern ArrayList *__CComp_String_split(void *_this, char *regex) {
     StringMatch *match = this->class->match(this, regex, 1);
     ArrayList *result = CreateArrayList((int) sizeof(String *));
 
@@ -180,21 +180,21 @@ static ArrayList *__string_split(void *_this, char *regex) {
 
 #endif
 
-static void __string_addLong(void *_this, long int number) {
+extern void __CComp_String_addLong(void *_this, long int number) {
     String *numberTemp = createStringLong(number);
     this->class->add(this, numberTemp->class->getValue(numberTemp));
 
     delete(numberTemp);
 }
 
-static void __string_addULong(void *_this, unsigned long int number) {
+extern void __CComp_String_addULong(void *_this, unsigned long int number) {
     String *numberTemp = createStringULong(number);
     this->class->add(this, numberTemp->class->getValue(numberTemp));
 
     delete(numberTemp);
 }
 
-static int __string_toInt(void *_this) {
+extern int __CComp_String_toInt(void *_this) {
     int thisLength = this->class->length(this);
     int zeroCount = thisLength - 1;
 
@@ -224,33 +224,33 @@ static int __string_toInt(void *_this) {
     return result;
 }
 
-static char __string_charAt(void *_this, int index) {
+extern char __CComp_String_charAt(void *_this, int index) {
     return this->class->getValue(this)[index];
 }
 
-static int __string_stringLength(void *_this) {
+extern int __CComp_String_stringLength(void *_this) {
     return (int) strlen(this->class->getValue(this));
 }
 
-static bool __string_equals(void *_this, String *subject) {
+extern bool __CComp_String_equals(void *_this, String *subject) {
     return (bool) strcmp(this->class->getValue(this), subject->class->getValue(subject)) == 0;
 }
 
-static bool __string_equalsChr(void *_this, char *subject) {
+extern bool __CComp_String_equalsChr(void *_this, char *subject) {
     return (bool) strcmp(this->class->getValue(this), subject) == 0;
 }
 
-static String *__string_toString(void *_this) {
+extern String *__CComp_String_implObject_toString(void *_this) {
     return this->class->_impl_CCObject.copy(this);
 }
 
-static void *__string_copy(void *_this) {
+extern void *__CComp_String_implObject_copy(void *_this) {
     String *newString = createStringChar(this->class->getValue(this));
 
     return newString;
 }
 
-static String *createStringNull(void *value) {
+extern String *createStringNull(void *value) {
     String *newString   = (String *) malloc(sizeof(String));
     newString->_private = NULL;
     newString->class    = &ClassString;
@@ -301,7 +301,7 @@ extern String *createStringULong(unsigned long int number) {
     return __createStringLong((long int) number, true);
 }
 
-static void __string_delete(void *_this) {
+extern void __CComp_Cls_String_delete(void *_this) {
     Private *stringValue = (Private *) this->_private;
     
     free(stringValue->stringValue);
@@ -310,31 +310,31 @@ static void __string_delete(void *_this) {
 }
 
 ClassStringType ClassString = {
-    &__string_get,
-    &__string_set,
-    &__string_add,
-    &__string_sub,
+    &__CComp_String_get,
+    &__CComp_String_set,
+    &__CComp_String_add,
+    &__CComp_String_sub,
 #ifndef _WIN32
-    &__string_replace,
-    &__string_replaceFirst,
-    &__string_match,
-    &__string_split,
+    &__CComp_String_replace,
+    &__CComp_String_replaceFirst,
+    &__CComp_String_match,
+    &__CComp_String_split,
 #endif
-    &__string_addLong,
-    &__string_addULong,
-    &__string_toInt,
-    &__string_charAt,
-    &__string_stringLength,
-    &__string_equals,
-    &__string_equalsChr,
+    &__CComp_String_addLong,
+    &__CComp_String_addULong,
+    &__CComp_String_toInt,
+    &__CComp_String_charAt,
+    &__CComp_String_stringLength,
+    &__CComp_String_equals,
+    &__CComp_String_equalsChr,
     {
         INTERFACE_CCOBJECT,
-        &__string_toString,
-        &__string_copy
+        &__CComp_String_implObject_toString,
+        &__CComp_String_implObject_copy
     }
 };
 
 Class classString = {
     .classType = CLASS_STRING,
-    .delete    = &__string_delete
+    .delete    = &__CComp_Cls_String_delete
 };

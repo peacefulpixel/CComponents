@@ -12,7 +12,7 @@ typedef struct _list_private {
     unsigned long int listSize;
 } Private;
 
-static void __list_push(void *_this, void *value) {
+extern void __CComp_ArrayList_implList_push(void *_this, void *value) {
     Private *private = (Private *) this->_private;
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
     
@@ -30,7 +30,7 @@ static void __list_push(void *_this, void *value) {
     free(oldPrivate);
 }
 
-static void __list_remove(void *_this, unsigned long int index) {
+extern void __CComp_ArrayList_implList_remove(void *_this, unsigned long int index) {
     Private *private = (Private *) this->_private;
 
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
@@ -50,24 +50,24 @@ static void __list_remove(void *_this, unsigned long int index) {
     free(oldPrivate);
 }
 
-static void __list_set(void *_this, unsigned long int index, void *value) {
+extern void __CComp_ArrayList_implList_set(void *_this, unsigned long int index, void *value) {
     Private *private = (Private *) this->_private;
 
     memcpy(&private->listValue[index], &value, (size_t) P_SIZE);
 }
 
-static void *__list_get(void *_this, unsigned long int index) {
+extern void *__CComp_ArrayList_implList_get(void *_this, unsigned long int index) {
     Private *private = (Private *) this->_private;
 
     return private->listValue[index];
 }
 
-static unsigned long int __list_length(void *_this) {
+extern unsigned long int __CComp_ArrayList_implList_length(void *_this) {
     return ((Private *) this->_private)->listSize;
 }
 
-static String *__list_toString(void *_this) {
-    unsigned long int listLength = __list_length(this);
+extern String *__CComp_ArrayList_implObject_toString(void *_this) {
+    unsigned long int listLength = __CComp_ArrayList_implList_length(this);
     String *result = CreateString("ArrayList: [ ");
 
     for (unsigned long int index = 0; index < listLength; index++) {
@@ -83,19 +83,19 @@ static String *__list_toString(void *_this) {
     return result;
 }
 
-static void __list_include(void *_this, void **array, unsigned long int count) {
-    for (int index = 0; index < count; index++) {
-        this->class->_impl_List.push(this, *(array + index));
-    }
-}
-
-static void *__list_copy(void *_this) {
+extern void *__CComp_ArrayList_implObject_copy(void *_this) {
     Private *private = (Private *) this->_private;
 
     ArrayList *newArrayList = CreateArrayList();
     newArrayList->class->include(newArrayList, private->listValue, private->listSize);
 
     return newArrayList;
+}
+
+extern void __CComp_ArrayList_include(void *_this, void **array, unsigned long int count) {
+    for (int index = 0; index < count; index++) {
+        this->class->_impl_List.push(this, *(array + index));
+    }
 }
 
 extern ArrayList *createArrayList() {
@@ -109,7 +109,7 @@ extern ArrayList *createArrayList() {
     return newArrayList;
 }
 
-static void __list_delete(void *_this) {
+extern void __CComp_Cls_ArrayList_delete(void *_this) {
     Private *private = (Private *) this->_private;
 
     free(private->listValue);
@@ -118,23 +118,23 @@ static void __list_delete(void *_this) {
 }
 
 ClassArrayListType ClassArrayList = {
-    &__list_include,
+    &__CComp_ArrayList_include,
     {
         INTERFACE_LIST,
-        &__list_push,
-        &__list_remove,
-        &__list_set,
-        &__list_get,
-        &__list_length,
+        &__CComp_ArrayList_implList_push,
+        &__CComp_ArrayList_implList_remove,
+        &__CComp_ArrayList_implList_set,
+        &__CComp_ArrayList_implList_get,
+        &__CComp_ArrayList_implList_length,
         {
             INTERFACE_CCOBJECT,
-            &__list_toString,
-            &__list_copy
+            &__CComp_ArrayList_implObject_toString,
+            &__CComp_ArrayList_implObject_copy
         }
     }
 };
 
 Class classArrayList = {
     .classType = CLASS_ARRAY_LIST,
-    .delete    = &__list_delete
+    .delete    = &__CComp_Cls_ArrayList_delete
 };
