@@ -11,12 +11,14 @@ BUILD_DIR = build
 
 SOURCES = $(SRC_DIR)/util/regex.c \
           $(SRC_DIR)/array_list.c \
+          $(SRC_DIR)/linked_list.c \
           $(SRC_DIR)/array_map.c  \
           $(SRC_DIR)/string.c
 OBJECTS = $(patsubst $(SRC_DIR)/%.c, $(BIN_DIR)/%.o, $(SOURCES))
 
 TEST_SOURCES = $(TEST_DIR)/tests/util/regex.c \
                $(TEST_DIR)/tests/array_list.c \
+               $(TEST_DIR)/tests/linked_list.c \
                $(TEST_DIR)/tests/array_map.c \
                $(TEST_DIR)/tests/string.c
 TEST_OBJECTS = $(patsubst $(TEST_DIR)/%.c, $(TEST_DIR)/%.o, $(TEST_SOURCES))

@@ -23,8 +23,9 @@ typedef enum _ccomp_classtype {
     INTERFACE_LIST,
     INTERFACE_MAP,
     CLASS_ARRAY_LIST,
+    CLASS_LINKED_LIST,
     CLASS_ARRAY_MAP,
-    CLASS_STRING
+    CLASS_STRING,
 } ClassType;
 
 typedef struct _ccomp_class {
@@ -48,6 +49,8 @@ typedef struct _ccomp_map Map;
 
 typedef struct _ccomp_array_list_class ClassArrayListType;
 typedef struct _ccomp_array_list ArrayList;
+typedef struct _ccomp_linked_list_class ClassLinkedListType;
+typedef struct _ccomp_linked_list LinkedList;
 typedef struct _ccomp_array_map_class ClassArrayMapType;
 typedef struct _ccomp_array_map ArrayMap;
 typedef struct _ccomp_string_class ClassStringType;
@@ -105,6 +108,36 @@ extern ArrayList *createArrayList();
 #error Macro CreateArrayList already defined
 #endif /* CreateArrayList */
 #define CreateArrayList createArrayList
+
+/**
+ * LinkedList
+ */
+
+extern Class classLinkedList;
+extern ClassLinkedListType ClassLinkedList;
+
+struct _ccomp_linked_list_class {
+    void (*addFirst)(void *this, void *);
+    void *(*getFirst)(void *this);
+    void *(*getLast)(void *this);
+    void (*removeFirst)(void *this);
+    void (*removeLast)(void *this);
+
+    List _impl_List;
+};
+
+struct _ccomp_linked_list {
+    Class *_class;
+    ClassLinkedListType *class;
+    v_private _private;
+};
+
+extern LinkedList *createLinkedList();
+
+#ifdef CreateLinkedList
+#error Macro CreateLinkedList already defined
+#endif /* CreateLinkedList */
+#define CreateLinkedList createLinkedList
 
 /**
  * ArrayMap
