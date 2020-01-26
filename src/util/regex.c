@@ -433,11 +433,12 @@ static _RegError *processSequence(char **buffer, char *sequence) {
             if (!(to = *(sequence + c + 2)))
                 return regErr(c, "Invalid symbol range");
 
-            char diff = (char) (to - current + 1);
-            if (diff < 1)
+            char sDiff = (char) (to - current + 1);
+            if (sDiff < 1)
                 return regErr(c, "Invalid symbol range");
 
-            char *seq = malloc(CH_SIZE * (unsigned int) diff + 1);
+            const unsigned char diff = (unsigned char) sDiff;
+            char *seq = malloc(CH_SIZE * diff + 1);
             for (char c1 = 0; c1 < diff; c1++) {
                 *(seq + c1) = (char) (current + c1);
             }
@@ -483,7 +484,7 @@ static bool processCustomCount(char *pattern, unsigned int *countFrom,
     char *_countFrom = pattern + 1,
          *_countTo = NULL;
 
-    size_t bracketIndex;
+    unsigned int bracketIndex;
 
     for (char *p = pattern;; p++) {
 
@@ -496,7 +497,8 @@ static bool processCustomCount(char *pattern, unsigned int *countFrom,
                 return false;
 
             *p = ENDLN;
-            bracketIndex = (size_t) (p - pattern);
+            // TODO: x64 support
+            bracketIndex = (unsigned int) (p - pattern);
             break;
         }
 
