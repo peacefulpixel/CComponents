@@ -38,10 +38,10 @@ extern void __CComp_ArrayMap_implMap_set(void *_this, char *key, void *value) {
 
     if (index == -1) {
         String *newKey = CreateString(key);
-        private->keys->class->_impl_List.push(private->keys, newKey);
+        private->keys->class->_impl_List.add(private->keys, newKey);
 
         void *randomMemory = malloc((size_t) P_SIZE);
-        private->values->class->_impl_List.push(private->values, randomMemory);
+        private->values->class->_impl_List.add(private->values, randomMemory);
         free(randomMemory);
 
         private->mapSize++;
@@ -105,8 +105,8 @@ extern void *__CComp_ArrayMap_implObject_copy(void *_this) {
     ArrayList *vals = private->values;
 
     for (unsigned long int index = 0; index < this->class->_impl_Map.length(this); index++) {
-        nKeys->class->_impl_List.push(nKeys, keys->class->_impl_List.get(keys, index));
-        nVals->class->_impl_List.push(nVals, vals->class->_impl_List.get(vals, index));
+        nKeys->class->_impl_List.add(nKeys, keys->class->_impl_List.get(keys, index));
+        nVals->class->_impl_List.add(nVals, vals->class->_impl_List.get(vals, index));
     }
 
     return newArrayMap;

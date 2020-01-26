@@ -12,7 +12,7 @@ typedef struct _list_private {
     unsigned long int listSize;
 } Private;
 
-extern void __CComp_ArrayList_implList_push(void *_this, void *value) {
+extern void __CComp_ArrayList_implList_add(void *_this, void *value) {
     Private *private = (Private *) this->_private;
     Private *oldPrivate  = (Private *) malloc(sizeof(Private));
     
@@ -94,7 +94,7 @@ extern void *__CComp_ArrayList_implObject_copy(void *_this) {
 
 extern void __CComp_ArrayList_include(void *_this, void **array, unsigned long int count) {
     for (int index = 0; index < count; index++) {
-        this->class->_impl_List.push(this, *(array + index));
+        this->class->_impl_List.add(this, *(array + index));
     }
 }
 
@@ -121,7 +121,7 @@ ClassArrayListType ClassArrayList = {
     &__CComp_ArrayList_include,
     {
         INTERFACE_LIST,
-        &__CComp_ArrayList_implList_push,
+        &__CComp_ArrayList_implList_add,
         &__CComp_ArrayList_implList_remove,
         &__CComp_ArrayList_implList_set,
         &__CComp_ArrayList_implList_get,

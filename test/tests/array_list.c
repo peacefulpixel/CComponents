@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
         };
 
     for (int x = 0; x < 4; x++)
-        ClassArrayList._impl_List.push(list, testData[x]);
+        ClassArrayList._impl_List.add(list, testData[x]);
 
     assert(ClassArrayList._impl_List.length(list) == 4);
 

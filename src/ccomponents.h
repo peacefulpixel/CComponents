@@ -64,7 +64,7 @@ struct _ccomp_object {
 
 struct _ccomp_list {
     ClassType interfaceType;
-    void (*push)(void *this, void *value);
+    void (*add)(void *this, void *value);
     void (*remove)(void *this, unsigned long int index);
     void (*set)(void *this, unsigned long int index, void *value);
     void *(*get)(void *this, unsigned long int index);

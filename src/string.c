@@ -169,9 +169,9 @@ extern ArrayList *__CComp_String_split(void *_this, char *regex) {
         delete(copy);
         copy = newCopy;
 
-        result->class->_impl_List.push(result, sub);
+        result->class->_impl_List.add(result, sub);
         match = copy->class->match(copy, regex, 1);
-    } result->class->_impl_List.push(result, CreateString(copy->class->getValue(copy)));
+    } result->class->_impl_List.add(result, CreateString(copy->class->getValue(copy)));
 
     delete(copy);
     free(match);
