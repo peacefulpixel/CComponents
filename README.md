@@ -1,3 +1,7 @@
+## THIS TRASH ARE NOT WORKING FOR NOW
+## PLEASE DONT USE IT
+## ... im working on it
+
 # CComponents
 The set of high-level instruments for C
 
