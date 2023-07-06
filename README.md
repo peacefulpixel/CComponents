@@ -1,6 +1,8 @@
-## THIS TRASH ARE NOT WORKING FOR NOW
-## PLEASE DONT USE IT
-## ... im working on it
+❗❗❗**Attention here please**❗❗❗
+
+This project is NOT supported as it was anymore, because author has changed his mind on it. It's STRONGLY recomended to use this project only as an example for your expirience, because it works and does the job, but does it worse then any other tool that was released ever.
+
+**THIS PROJECT WASN'T RELEASED AT ALL**
 
 # CComponents
 The set of high-level instruments for C
